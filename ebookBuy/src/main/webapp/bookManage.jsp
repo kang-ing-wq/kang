@@ -2,9 +2,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
-    <title>典籍总录·掌阁权限 - Online藏书阁</title>
+    <title>典籍总录 - Online藏书阁</title>
     <style>
-        /* ========== 复用你现有全局变量与样式 ========== */
+        /* ========== 全局重置与变量 ========== */
         * {
             margin: 0;
             padding: 0;
@@ -33,7 +33,7 @@
             overflow-x: hidden;
         }
 
-        /* ========== 复用左侧导航栏样式 ========== */
+        /* ========== 左侧导航栏样式 ========== */
         .nav-sidebar {
             position: fixed;
             top: 0;
@@ -237,7 +237,7 @@
             color: var(--bg-deepest);
         }
 
-        /* ========== 核心：典籍表格样式 ========== */
+        /* ========== 典籍表格核心样式 ========== */
         .book-table-wrap {
             width: 100%;
             overflow-x: auto;
@@ -275,6 +275,21 @@
             color: var(--text-secondary);
             font-size: 16px;
             line-height: 1.5;
+            vertical-align: middle;
+        }
+        /* 封面图片样式 */
+        .book-cover-img {
+            width: 60px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid var(--gold-dark);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease;
+        }
+        .book-cover-img:hover {
+            transform: scale(1.05);
+            border-color: var(--gold-mid);
         }
         .book-table .action-group {
             display: flex;
@@ -397,11 +412,11 @@
     </style>
 </head>
 <body>
-<!-- 权限校验：非管理员直接跳回首页 -->
-<c:if test="${empty sessionScope.loginUser || sessionScope.loginUser.username != 'admin'}">
+<!-- 权限校验 -->
+<c:if test="${empty sessionScope.loginUser}">
     <script>
-        alert("道友暂无掌阁权限，请以管理员身份登录！");
-        window.location.href = "${pageContext.request.contextPath}/zongmen.jsp";
+        alert("道友请先登录，方可使用典籍管理功能！");
+        window.location.href = "${pageContext.request.contextPath}/login.jsp";
     </script>
 </c:if>
 
@@ -417,9 +432,10 @@
     <div class="logo">📜 Online藏书阁</div>
     <a href="zongmen.jsp" class="nav-item">🏠 图书管理首页</a>
     <a href="tushuguan" class="nav-item">📚 全本藏书</a>
-    <a href="bookManage.jsp" class="nav-item active">📋 典籍总录·掌阁权限</a>
+    <a href="${pageContext.request.contextPath}/bookManage" class="nav-item active">📋 典籍总录·管理</a>
     <a href="usersList" class="nav-item">👥 人员注册名录</a>
     <a href="${pageContext.request.contextPath}/chapterAdd" class="nav-item">📖 录入章节</a>
+    <a href="javascript:openAddForm()" class="nav-item">✍️ 新增典籍</a>
 </div>
 
 <!-- 右侧主内容区 -->
@@ -428,14 +444,17 @@
 
     <!-- 搜索筛选栏 -->
     <div class="search-bar">
+        <!-- 排序状态隐藏域 -->
+        <input type="hidden" id="sortField" value="id">
+        <input type="hidden" id="sortOrder" value="desc">
         <div class="search-group">
-            <input type="text" class="search-input" id="searchInput" placeholder="请输入典籍名称/作者搜索...">
+            <input type="text" class="search-input" id="searchInput" placeholder="请输入典籍名称/作者搜索..." value="${empty keyword ? '' : keyword}">
             <select class="search-select" id="typeFilter">
-                <option value="">全部分类</option>
-                <option value="1">玄幻修真</option>
-                <option value="2">科幻科技</option>
-                <option value="3">历史武侠</option>
-                <option value="4">经典文学</option>
+                <option value="" ${empty typeId ? 'selected' : ''}>全部分类</option>
+                <option value="1" ${typeId == '1' ? 'selected' : ''}>玄幻修真</option>
+                <option value="2" ${typeId == '2' ? 'selected' : ''}>科幻科技</option>
+                <option value="3" ${typeId == '3' ? 'selected' : ''}>历史武侠</option>
+                <option value="4" ${typeId == '4' ? 'selected' : ''}>经典文学</option>
             </select>
             <button class="magic-btn" onclick="searchBook()">🔍 搜索</button>
             <button class="magic-btn" onclick="resetSearch()">重置</button>
@@ -446,9 +465,24 @@
     <!-- 典籍表格 -->
     <div class="book-table-wrap">
         <table class="book-table" id="bookTable">
+            <colgroup>
+                <col style="width: 80px;">
+                <col style="width: 60px;">
+                <col style="width: 150px;">
+                <col style="width: 120px;">
+                <col style="width: 100px;">
+                <col style="width: 110px;">
+                <col style="width: 90px;">
+                <col style="width: 80px;">
+                <col style="width: 100px;">
+                <col style="width: 240px;">
+            </colgroup>
             <thead>
             <tr>
-                <th>典籍ID</th>
+                <th>封面</th>
+                <th id="sortIdTh" style="cursor: pointer; user-select: none;" onclick="switchSort()">
+                    典籍ID <span id="sortArrow">↓</span>
+                </th>
                 <th>典籍名称</th>
                 <th>作者</th>
                 <th>分类</th>
@@ -461,7 +495,34 @@
             </thead>
             <tbody>
             <c:forEach items="${bookList}" var="book">
-                <tr data-book-id="${book.id}">
+                <tr
+                        data-book-id="${book.id}"
+                        data-title="${book.bookTitle}"
+                        data-author="${book.bookAuthor}"
+                        data-summary="${book.bookSummary}"
+                        data-type-id="${book.typeId}"
+                        data-pubyear="${book.bookPubYear}"
+                        data-times="${book.downloadTimes}"
+                        data-format="${book.bookFormat}"
+                        data-price="${book.price}"
+                        data-file="${book.bookFile}"
+                        data-cover="${book.bookCover}">
+                    <td>
+                        <c:choose>
+                            <c:when test="${not empty book.bookCover}">
+                                <img src="${pageContext.request.contextPath}${book.bookCover}"
+                                     alt="${book.bookTitle}"
+                                     class="book-cover-img"
+                                     loading="lazy"
+                                     onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'80\' viewBox=\'0 0 60 80\'%3E%3Crect width=\'60\' height=\'80\' fill=\'%233d5a5a\'/%3E%3Ctext x=\'8\' y=\'45\' font-family=\'SimSun\' font-size=\'12\' fill=\'%23c9a866\'%3E无封面%3C/text%3E%3C/svg%3E'">
+                            </c:when>
+                            <c:otherwise>
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='80' viewBox='0 0 60 80'%3E%3Crect width='60' height='80' fill='%233d5a5a'/%3E%3Ctext x='8' y='45' font-family='SimSun' font-size='12' fill='%23c9a866'%3E无封面%3C/text%3E%3C/svg%3E"
+                                     alt="默认封面"
+                                     class="book-cover-img">
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
                     <td>${book.id}</td>
                     <td>${book.bookTitle}</td>
                     <td>${book.bookAuthor}</td>
@@ -490,7 +551,7 @@
             </c:forEach>
             <c:if test="${empty bookList}">
                 <tr>
-                    <td colspan="9" class="table-empty">藏经阁暂无典籍，快去录入新典籍吧</td>
+                    <td colspan="10" class="table-empty">藏经阁暂无典籍，快去录入新典籍吧</td>
                 </tr>
             </c:if>
             </tbody>
@@ -498,58 +559,30 @@
     </div>
 </div>
 
-<!-- 新增典籍弹窗（复用你现有逻辑） -->
+<!-- 新增典籍弹窗 -->
 <div class="form-modal" id="addFormModal">
     <div class="form-card">
         <h3>录入新典籍</h3>
         <form action="bookAdd" method="post">
-            <div class="form-row">
-                <label>典籍名称</label>
-                <input type="text" name="bookTitle" required>
-            </div>
-            <div class="form-row">
-                <label>典籍作者</label>
-                <input type="text" name="bookAuthor" required>
-            </div>
-            <div class="form-row">
-                <label>典籍简介</label>
-                <textarea name="bookSummary" required></textarea>
-            </div>
+            <div class="form-row"><label>典籍名称</label><input type="text" name="bookTitle" required></div>
+            <div class="form-row"><label>典籍作者</label><input type="text" name="bookAuthor" required></div>
+            <div class="form-row"><label>典籍简介</label><textarea name="bookSummary" required></textarea></div>
             <div class="form-row">
                 <label>典籍分类</label>
                 <select name="typeId" required>
-                    <option value="1">玄幻修真</option>
-                    <option value="2">科幻科技</option>
-                    <option value="3">历史武侠</option>
-                    <option value="4">经典文学</option>
+                    <option value="1">玄幻修真</option><option value="2">科幻科技</option>
+                    <option value="3">历史武侠</option><option value="4">经典文学</option>
                 </select>
             </div>
-            <div class="form-row">
-                <label>典籍价格(灵石)</label>
-                <input type="number" name="price" step="0.01" value="0.00" required>
-            </div>
-            <div class="form-row">
-                <label>传阅次数</label>
-                <input type="number" name="downloadTimes" value="0" required>
-            </div>
-            <div class="form-row">
-                <label>出版年份</label>
-                <input type="date" name="bookPubYear" required>
-            </div>
-            <div class="form-row">
-                <label>典籍文件路径</label>
-                <input type="text" name="bookFile" value="/files/default.pdf">
-            </div>
-            <div class="form-row">
-                <label>典籍封面路径</label>
-                <input type="text" name="bookCover" value="/cover/default.jpg">
-            </div>
+            <div class="form-row"><label>典籍价格(灵石)</label><input type="number" name="price" step="0.01" value="0.00" required></div>
+            <div class="form-row"><label>传阅次数</label><input type="number" name="downloadTimes" value="0" required></div>
+            <div class="form-row"><label>出版年份</label><input type="date" name="bookPubYear" required></div>
+            <div class="form-row"><label>典籍文件路径</label><input type="text" name="bookFile" value="/files/default.pdf"></div>
+            <div class="form-row"><label>典籍封面路径</label><input type="text" name="bookCover" value="/cover/default.jpg"></div>
             <div class="form-row">
                 <label>典籍格式</label>
                 <select name="bookFormat" required>
-                    <option value="pdf">PDF</option>
-                    <option value="epub">EPUB</option>
-                    <option value="txt">TXT</option>
+                    <option value="pdf">PDF</option><option value="epub">EPUB</option><option value="txt">TXT</option>
                 </select>
             </div>
             <div class="form-btn-group">
@@ -566,53 +599,25 @@
         <h3>编辑典籍信息</h3>
         <form id="editForm" method="post" action="bookUpdate">
             <input type="hidden" name="id" id="edit-book-id">
-            <div class="form-row">
-                <label>典籍名称</label>
-                <input type="text" name="bookTitle" id="edit-book-title" required>
-            </div>
-            <div class="form-row">
-                <label>典籍作者</label>
-                <input type="text" name="bookAuthor" id="edit-book-author" required>
-            </div>
-            <div class="form-row">
-                <label>典籍简介</label>
-                <textarea name="bookSummary" id="edit-book-summary" required></textarea>
-            </div>
+            <div class="form-row"><label>典籍名称</label><input type="text" name="bookTitle" id="edit-book-title" required></div>
+            <div class="form-row"><label>典籍作者</label><input type="text" name="bookAuthor" id="edit-book-author" required></div>
+            <div class="form-row"><label>典籍简介</label><textarea name="bookSummary" id="edit-book-summary" required></textarea></div>
             <div class="form-row">
                 <label>典籍分类</label>
                 <select name="typeId" id="edit-book-type" required>
-                    <option value="1">玄幻修真</option>
-                    <option value="2">科幻科技</option>
-                    <option value="3">历史武侠</option>
-                    <option value="4">经典文学</option>
+                    <option value="1">玄幻修真</option><option value="2">科幻科技</option>
+                    <option value="3">历史武侠</option><option value="4">经典文学</option>
                 </select>
             </div>
-            <div class="form-row">
-                <label>典籍价格(灵石)</label>
-                <input type="number" name="price" id="edit-book-price" step="0.01" required>
-            </div>
-            <div class="form-row">
-                <label>传阅次数</label>
-                <input type="number" name="downloadTimes" id="edit-book-times" required>
-            </div>
-            <div class="form-row">
-                <label>出版年份</label>
-                <input type="date" name="bookPubYear" id="edit-book-pubyear" required>
-            </div>
-            <div class="form-row">
-                <label>典籍文件路径</label>
-                <input type="text" name="bookFile" id="edit-book-file">
-            </div>
-            <div class="form-row">
-                <label>典籍封面路径</label>
-                <input type="text" name="bookCover" id="edit-book-cover">
-            </div>
+            <div class="form-row"><label>典籍价格(灵石)</label><input type="number" name="price" id="edit-book-price" step="0.01" required></div>
+            <div class="form-row"><label>传阅次数</label><input type="number" name="downloadTimes" id="edit-book-times" required></div>
+            <div class="form-row"><label>出版年份</label><input type="date" name="bookPubYear" id="edit-book-pubyear" required></div>
+            <div class="form-row"><label>典籍文件路径</label><input type="text" name="bookFile" id="edit-book-file"></div>
+            <div class="form-row"><label>典籍封面路径</label><input type="text" name="bookCover" id="edit-book-cover"></div>
             <div class="form-row">
                 <label>典籍格式</label>
                 <select name="bookFormat" id="edit-book-format" required>
-                    <option value="pdf">PDF</option>
-                    <option value="epub">EPUB</option>
-                    <option value="txt">TXT</option>
+                    <option value="pdf">PDF</option><option value="epub">EPUB</option><option value="txt">TXT</option>
                 </select>
             </div>
             <div class="form-btn-group">
@@ -624,113 +629,130 @@
 </div>
 
 <script>
-    // ================== 弹窗控制 ==================
+    // ================== 全局变量 ==================
     var addFormModal = document.getElementById('addFormModal');
     var editFormModal = document.getElementById('editFormModal');
+    var searchInput = document.getElementById('searchInput');
+    var typeFilter = document.getElementById('typeFilter');
 
-    // 新增弹窗
+    // ================== 新增弹窗控制 ==================
     function openAddForm() { addFormModal.style.display = 'flex'; }
     function closeAddForm() { addFormModal.style.display = 'none'; }
     addFormModal.onclick = function(e) { if (e.target === this) closeAddForm(); };
 
-    // 编辑弹窗
+    // ================== 编辑弹窗控制（全字段回显） ==================
     function openEditModal(tr) {
-        // 从tr的dataset和单元格获取数据，预填充表单
-        var bookId = tr.dataset.bookId;
-        var tds = tr.querySelectorAll('td');
-
-        document.getElementById('edit-book-id').value = bookId;
-        document.getElementById('edit-book-title').value = tds[1].innerText;
-        document.getElementById('edit-book-author').value = tds[2].innerText;
-        // 分类回显
-        var typeText = tds[3].innerText;
-        var typeMap = {"玄幻修真":1, "科幻科技":2, "历史武侠":3, "经典文学":4};
-        document.getElementById('edit-book-type').value = typeMap[typeText] || 1;
-        document.getElementById('edit-book-pubyear').value = tds[4].innerText;
-        document.getElementById('edit-book-times').value = tds[5].innerText;
-        document.getElementById('edit-book-format').value = tds[6].innerText;
-        document.getElementById('edit-book-price').value = tds[7].innerText;
-
-        // 这里需要补充简介、文件路径、封面路径，建议你在tr的dataset里补充
-        // 你可以给book-card的tr加上data-summary、data-file、data-cover，和全本藏书页一样
-        // 示例：<tr data-book-id="${book.id}" data-summary="${book.bookSummary}" data-file="${book.bookFile}" data-cover="${book.bookCover}">
-        // 然后打开下面三行注释即可
-        // document.getElementById('edit-book-summary').value = tr.dataset.summary;
-        // document.getElementById('edit-book-file').value = tr.dataset.file;
-        // document.getElementById('edit-book-cover').value = tr.dataset.cover;
-
+        var dataset = tr.dataset;
+        document.getElementById('edit-book-id').value = dataset.bookId;
+        document.getElementById('edit-book-title').value = dataset.title;
+        document.getElementById('edit-book-author').value = dataset.author;
+        document.getElementById('edit-book-summary').value = dataset.summary;
+        document.getElementById('edit-book-type').value = dataset.typeId;
+        document.getElementById('edit-book-price').value = dataset.price;
+        document.getElementById('edit-book-times').value = dataset.times;
+        document.getElementById('edit-book-pubyear').value = dataset.pubyear;
+        document.getElementById('edit-book-file').value = dataset.file;
+        document.getElementById('edit-book-cover').value = dataset.cover;
+        document.getElementById('edit-book-format').value = dataset.format;
         editFormModal.style.display = 'flex';
     }
     function closeEditForm() { editFormModal.style.display = 'none'; }
     editFormModal.onclick = function(e) { if (e.target === this) closeEditForm(); };
 
     // ================== 搜索筛选 ==================
+    // 搜索筛选（带排序）
     function searchBook() {
-        var keyword = document.getElementById('searchInput').value.toLowerCase().trim();
-        var typeFilter = document.getElementById('typeFilter').value;
+        var keyword = searchInput.value.toLowerCase().trim();
+        var selectedTypeId = typeFilter.value;
+        var sortField = document.getElementById('sortField').value;
+        var sortOrder = document.getElementById('sortOrder').value;
         var rows = document.querySelectorAll('#bookTable tbody tr');
 
+        // 前端筛选逻辑不变
         rows.forEach(function(row) {
-            if (row.classList.contains('table-empty')) return;
-            var tds = row.querySelectorAll('td');
-            var title = tds[1].innerText.toLowerCase();
-            var author = tds[2].innerText.toLowerCase();
-            var typeId = row.querySelector('select') ? row.querySelector('select').value : '';
-            // 分类映射
-            var typeText = tds[3].innerText;
-            var typeMap = {"玄幻修真":1, "科幻科技":2, "历史武侠":3, "经典文学":4};
-            var rowTypeId = typeMap[typeText].toString();
-
-            // 匹配规则
-            var matchKeyword = title.includes(keyword) || author.includes(keyword);
-            var matchType = typeFilter === '' || rowTypeId === typeFilter;
-
-            row.style.display = matchKeyword && matchType ? '' : 'none';
+            if (row.querySelector('.table-empty')) return;
+            var dataset = row.dataset;
+            var isKeywordMatch = dataset.title.toLowerCase().includes(keyword) || dataset.author.toLowerCase().includes(keyword);
+            var isTypeMatch = selectedTypeId === '' || dataset.typeId === selectedTypeId;
+            row.style.display = (isKeywordMatch && isTypeMatch) ? '' : 'none';
         });
+
+        // 【核心】把排序参数传给后端，刷新页面获取排序后的数据
+        // 拼接参数，跳转Servlet重新查询
+        var url = "${pageContext.request.contextPath}/bookManage?keyword=" + encodeURIComponent(keyword)
+            + "&typeId=" + encodeURIComponent(selectedTypeId)
+            + "&sortField=" + encodeURIComponent(sortField)
+            + "&sortOrder=" + encodeURIComponent(sortOrder);
+
+        // 跳转刷新，保留搜索和排序状态
+        window.location.href = url;
     }
+    // 重置搜索和排序
     function resetSearch() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('typeFilter').value = '';
-        var rows = document.querySelectorAll('#bookTable tbody tr');
-        rows.forEach(function(row) { row.style.display = ''; });
+        searchInput.value = '';
+        typeFilter.value = '';
+        // 重置排序为默认降序
+        document.getElementById('sortField').value = 'id';
+        document.getElementById('sortOrder').value = 'desc';
+        document.getElementById('sortArrow').innerText = '↓';
+        // 重置后刷新页面
+        window.location.href = "${pageContext.request.contextPath}/bookManage";
     }
+    searchInput.addEventListener('keydown', function(e) { if (e.keyCode === 13) searchBook(); });
 
     // ================== 键盘事件 ==================
     document.onkeydown = function(e) {
         e = e || window.event;
-        if (e.keyCode === 27) {
-            closeAddForm();
-            closeEditForm();
-        }
+        if (e.keyCode === 27) { closeAddForm(); closeEditForm(); }
     };
 
-    // ================== 符文波纹特效 ==================
+    // ================== 符文特效 ==================
     var runeLibrary = ['临','兵','斗','者','皆','列','阵','在','前'];
     document.addEventListener('click', function(e) {
         if (e.target.closest('.nav-sidebar .nav-item')) return;
-        var wave = document.createElement('div');
-        wave.className = 'sword-wave';
-        wave.style.left = e.clientX + 'px';
-        wave.style.top = e.clientY + 'px';
+        var wave = document.createElement('div'); wave.className = 'sword-wave';
+        wave.style.left = e.clientX + 'px'; wave.style.top = e.clientY + 'px';
         document.body.appendChild(wave);
         setTimeout(function() { wave.classList.add('wave-animate'); }, 10);
         wave.addEventListener('animationend', function() { this.remove(); });
-
         var rune = runeLibrary[Math.floor(Math.random() * runeLibrary.length)];
-        var runeEl = document.createElement('div');
-        runeEl.className = 'rune-text';
-        runeEl.innerText = rune;
-        runeEl.style.left = (e.clientX - 16) + 'px';
-        runeEl.style.top = (e.clientY - 20) + 'px';
+        var runeEl = document.createElement('div'); runeEl.className = 'rune-text'; runeEl.innerText = rune;
+        runeEl.style.left = (e.clientX - 16) + 'px'; runeEl.style.top = (e.clientY - 20) + 'px';
         document.body.appendChild(runeEl);
         setTimeout(function() { runeEl.classList.add('rune-animate'); }, 10);
         runeEl.addEventListener('animationend', function() { this.remove(); });
     });
 
-    // 回车搜索
-    document.getElementById('searchInput').addEventListener('keydown', function(e) {
-        if (e.keyCode === 13) searchBook();
-    });
+    // 切换ID升序/降序
+    function switchSort() {
+        var sortOrderInput = document.getElementById('sortOrder');
+        var sortArrow = document.getElementById('sortArrow');
+
+        // 切换排序方向
+        if (sortOrderInput.value === 'desc') {
+            sortOrderInput.value = 'asc';
+            sortArrow.innerText = '↑';
+        } else {
+            sortOrderInput.value = 'desc';
+            sortArrow.innerText = '↓';
+        }
+
+        // 重新执行搜索，带上排序参数
+        searchBook();
+    }
+
+    // 页面加载时，同步排序箭头状态
+    window.onload = function() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var sortOrder = urlParams.get('sortOrder');
+        if (sortOrder === 'asc') {
+            document.getElementById('sortOrder').value = 'asc';
+            document.getElementById('sortArrow').innerText = '↑';
+        } else {
+            document.getElementById('sortOrder').value = 'desc';
+            document.getElementById('sortArrow').innerText = '↓';
+        }
+    }
 </script>
 </body>
 </html>

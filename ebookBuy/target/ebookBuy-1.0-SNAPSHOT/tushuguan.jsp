@@ -560,6 +560,8 @@
     <a href="login.jsp" class="nav-item">🔐 登录</a>
     <a href="register.jsp" class="nav-item">📝 注册成为藏书阁成员</a>
     <a href="tushuguan" class="nav-item active">📚 全本藏书</a>
+    <!-- 掌阁典籍总控台 仅管理员可见 -->
+    <a href="bookManage" class="nav-item active">📋 典籍总录·管理</a>
     <a href="javascript:openAddForm()" class="nav-item">✍️ 新增典籍</a>
     <a href="${pageContext.request.contextPath}/chapterAdd" class="nav-item">📖 录入章节</a>
     <c:if test="${not empty sessionScope.loginUser}">

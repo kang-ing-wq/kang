@@ -178,25 +178,6 @@
             gap: 8px;
         }
 
-        /* 左下角悬浮信息提示框 */
-        .hover-tip {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(13, 31, 36, 0.98);
-            border: 2px solid #c9a866;
-            border-radius: 8px;
-            padding: 18px 25px;
-            color: #f0e2c0;
-            font-size: 17px;
-            letter-spacing: 1px;
-            box-shadow: 0 0 25px rgba(0,0,0,0.9);
-            z-index: 9999;
-            display: none;
-            max-width: 420px;
-            line-height: 2;
-        }
-
         /* 弹窗通用样式 */
         .form-modal {
             display: none;
@@ -274,7 +255,6 @@
         }
 
         /* ================== 登录头像与用户卡片样式 ================== */
-        /* 头像容器 */
         .avatar-wrap {
             display: flex;
             flex-direction: column;
@@ -557,10 +537,11 @@
         </div>
     </div>
 
-    <!-- 修士名录表格 -->
+    <!-- 修士名录表格（新增头像列） -->
     <table class="magic-table" id="userTable">
         <thead>
         <tr>
+            <th style="width: 80px;">头像</th>
             <th>用户名</th>
             <th>密码</th>
             <th>性别</th>
@@ -571,8 +552,31 @@
         </thead>
         <tbody id="userTableBody">
         <c:forEach items="${userList}" var="user">
-            <tr>
-                <td style="display:none;" class="userIdCell">${user.id}</td>
+            <tr
+                    data-user-id="${user.id}"
+                    data-username="${user.username}"
+                    data-password="${user.password}"
+                    data-sex="${user.sex}"
+                    data-age="${user.age}"
+                    data-email="${user.email}"
+                    data-avatar="${user.avatarPath}">
+                <!-- 头像列 -->
+                <td>
+                    <c:choose>
+                        <c:when test="${not empty user.avatarPath}">
+                            <img src="${pageContext.request.contextPath}${user.avatarPath}"
+                                 alt="${user.username}"
+                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 2px solid #c9a866; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"
+                                 loading="lazy"
+                                 onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'50\' height=\'50\' viewBox=\'0 0 50 50\'%3E%3Ccircle cx=\'25\' cy=\'25\' r=\'25\' fill=\'%233d5a5a\'/%3E%3Ctext x=\'10\' y=\'30\' font-family=\'SimSun\' font-size=\'12\' fill=\'%23c9a866\'%3E无头像%3C/text%3E%3C/svg%3E'">
+                        </c:when>
+                        <c:otherwise>
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='25' fill='%233d5a5a'/%3E%3Ctext x='10' y='30' font-family='SimSun' font-size='12' fill='%23c9a866'%3E无头像%3C/text%3E%3C/svg%3E"
+                                 alt="默认头像"
+                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 2px solid #c9a866; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+                        </c:otherwise>
+                    </c:choose>
+                </td>
                 <td>${user.username}</td>
                 <td>${user.password}</td>
                 <td>${user.sex}</td>
@@ -590,10 +594,7 @@
     </table>
 </div>
 
-<!-- 左下角悬浮信息提示框 (隐藏) -->
-<div class="hover-tip" id="hoverTip" style="display:none;"></div>
-
-<!-- 修改用户信息弹窗 -->
+<!-- 修改用户信息弹窗（新增头像输入框） -->
 <div class="form-modal" id="updateFormModal">
     <div class="form-card">
         <h3>修改修士信息</h3>
@@ -621,6 +622,11 @@
             <div class="form-row">
                 <label>邮箱</label>
                 <input type="email" name="email" id="updateEmail" required>
+            </div>
+            <!-- 新增：头像路径输入框 -->
+            <div class="form-row">
+                <label>修士头像路径</label>
+                <input type="text" name="avatarPath" id="updateAvatar" placeholder="/images/xxx.jpg">
             </div>
             <div class="form-btn-group">
                 <button type="submit" class="magic-btn-sm">确认修改</button>
@@ -678,30 +684,7 @@
         return document.querySelectorAll('#userTableBody tr');
     }
 
-    // ---------- 悬浮显示信息 (用title属性) ----------
-    function addRowTitle() {
-        var rows = getAllRows();
-        for (var i = 0; i < rows.length; i++) {
-            var row = rows[i];
-            var cells = row.getElementsByTagName('td');
-            var userId = cells[0].innerText;
-            var username = cells[1].innerText;
-            var password = cells[2].innerText;
-            var sex = cells[3].innerText;
-            var age = cells[4].innerText;
-            var email = cells[5].innerText;
-
-            var titleText = '道号：' + username + '\n';
-            titleText += '编号：' + userId + '\n';
-            titleText += '性别：' + sex + '\n';
-            titleText += '年龄：' + age + '岁\n';
-            titleText += '邮箱：' + email;
-
-            row.title = titleText;
-        }
-    }
-
-    // ---------- 核心：组合过滤函数（性别 + 关键词）----------
+    // ---------- 核心：组合过滤函数（性别 + 关键词，完美恢复模糊搜索）----------
     function applyFilters() {
         var keyword = searchInput.value.trim().toLowerCase();
         var selectedSex = sexFilter.value;
@@ -709,13 +692,13 @@
         var rows = getAllRows();
         for (var i = 0; i < rows.length; i++) {
             var row = rows[i];
-            var cells = row.getElementsByTagName('td');
-            var username = cells[1].innerText.toLowerCase();
-            var sex = cells[3].innerText;
+            // 【修复】从tr的data属性获取，不依赖列索引，更稳定
+            var username = row.dataset.username.toLowerCase();
+            var sex = row.dataset.sex;
 
             // 性别匹配：all 或 等于当前选择
             var sexMatch = (selectedSex === 'all' || sex === selectedSex);
-            // 关键词匹配：用户名包含关键字
+            // 关键词匹配：用户名包含关键字（模糊搜索）
             var keywordMatch = (keyword === '' || username.indexOf(keyword) > -1);
 
             if (sexMatch && keywordMatch) {
@@ -742,7 +725,7 @@
         }
     };
 
-    // ---------- 年龄排序 (排序后保留过滤状态) ----------
+    // ---------- 年龄排序 (从data属性获取，不依赖列索引) ----------
     function sortByAge() {
         var sortType = document.getElementById('ageSort').value;
         var tbody = document.getElementById('userTableBody');
@@ -754,20 +737,20 @@
 
         if (sortType === 'asc') {
             rows.sort(function(a, b) {
-                var ageA = parseInt(a.getElementsByTagName('td')[4].innerText, 10);
-                var ageB = parseInt(b.getElementsByTagName('td')[4].innerText, 10);
+                // 【修复】从data-age属性获取
+                var ageA = parseInt(a.dataset.age, 10);
+                var ageB = parseInt(b.dataset.age, 10);
                 return ageA - ageB;
             });
         } else if (sortType === 'desc') {
             rows.sort(function(a, b) {
-                var ageA = parseInt(a.getElementsByTagName('td')[4].innerText, 10);
-                var ageB = parseInt(b.getElementsByTagName('td')[4].innerText, 10);
+                var ageA = parseInt(a.dataset.age, 10);
+                var ageB = parseInt(b.dataset.age, 10);
                 return ageB - ageA;
             });
         } else {
             // 默认排序不重新排列，直接应用过滤（保持原顺序）
             applyFilters();
-            addRowTitle();
             return;
         }
 
@@ -778,17 +761,16 @@
         for (var j = 0; j < rows.length; j++) {
             tbody.appendChild(rows[j]);
         }
-        // 重新应用过滤条件（排序后可能显示状态不正确，重新过滤）
+        // 重新应用过滤条件
         applyFilters();
-        addRowTitle();
     }
 
-    // ---------- 删除功能 ----------
+    // ---------- 删除功能 (从data属性获取) ----------
     function deleteUser(btn) {
-        var tr = btn.parentNode.parentNode.parentNode;
-        var cells = tr.getElementsByTagName('td');
-        var userId = cells[0].innerText;
-        var username = cells[1].innerText;
+        var tr = btn.closest('tr');
+        // 【修复】从data属性获取，不依赖列索引
+        var userId = tr.dataset.userId;
+        var username = tr.dataset.username;
 
         var confirmMsg = '确定要销毁【' + username + '】的道号吗？此操作不可恢复！';
         if (confirm(confirmMsg)) {
@@ -796,17 +778,18 @@
         }
     }
 
-    // ---------- 修改功能 ----------
+    // ---------- 修改功能 (完美修复，从data属性回显，点击有反应) ----------
     function openUpdateForm(btn) {
-        var tr = btn.parentNode.parentNode.parentNode;
-        var cells = tr.getElementsByTagName('td');
+        var tr = btn.closest('tr');
 
-        document.getElementById('updateUserId').value = cells[0].innerText;
-        document.getElementById('updateUsername').value = cells[1].innerText;
-        document.getElementById('updatePassword').value = cells[2].innerText;
-        document.getElementById('updateSex').value = cells[3].innerText;
-        document.getElementById('updateAge').value = cells[4].innerText;
-        document.getElementById('updateEmail').value = cells[5].innerText;
+        // 【修复】全部从tr的data-*属性获取，不依赖列索引，100%准确
+        document.getElementById('updateUserId').value = tr.dataset.userId;
+        document.getElementById('updateUsername').value = tr.dataset.username;
+        document.getElementById('updatePassword').value = tr.dataset.password;
+        document.getElementById('updateSex').value = tr.dataset.sex;
+        document.getElementById('updateAge').value = tr.dataset.age;
+        document.getElementById('updateEmail').value = tr.dataset.email;
+        document.getElementById('updateAvatar').value = tr.dataset.avatar;
 
         updateModal.style.display = 'flex';
     }
@@ -835,7 +818,6 @@
 
     // 页面加载完成
     window.onload = function() {
-        addRowTitle();
         // 确保初始状态所有行显示
         applyFilters();
     };
@@ -850,7 +832,7 @@
         }
     };
 
-    // ================== 头像与用户卡片交互 ==================
+    // ================== 头像与用户卡片交互（保留原有逻辑） ==================
     var loginAvatar = document.getElementById('loginAvatar');
     var userCard = document.getElementById('userCard');
     var guestAvatar = document.getElementById('guestAvatar');
@@ -912,18 +894,6 @@
             xhr.send('newTitle=' + encodeURIComponent(newTitle));
         };
     }
-
-    // 重写键盘事件以整合原有功能
-    var originalOnkeydown = document.onkeydown;
-    document.onkeydown = function(e) {
-        e = e || window.event;
-        if (e.keyCode === 27) {
-            closeTitleModal();
-            closeUpdateForm();
-            closeAddForm();
-        }
-        if (originalOnkeydown) originalOnkeydown(e);
-    };
 </script>
 </body>
 </html>

@@ -108,6 +108,7 @@ public class UsersDao {
 
     // ================== 人员名录原有方法（保留，适配String类型id） ==================
     // 查询所有用户（人员注册名录用）
+    // 查询所有用户（人员注册名录用，【修改】新增头像字段）
     public List<User> findAllUsers() throws SQLException, ClassNotFoundException {
         DBManager dbManager = new DBManager();
         Connection connection = dbManager.getConnection();
@@ -125,6 +126,8 @@ public class UsersDao {
             user.setAge(rs.getInt("age"));
             user.setEmail(rs.getString("email"));
             user.setUserTitle(rs.getString("user_title"));
+            // 【新增】封装头像路径
+            user.setAvatarPath(rs.getString("avatar_path"));
             userList.add(user);
         }
 
@@ -146,7 +149,7 @@ public class UsersDao {
         connection.close();
     }
 
-    // 根据ID查询用户
+    // 根据ID查询用户（【修改】新增头像字段，用于修改弹窗回显）
     public User findUserById(String id) throws SQLException, ClassNotFoundException {
         DBManager dbManager = new DBManager();
         Connection connection = dbManager.getConnection();
@@ -165,6 +168,8 @@ public class UsersDao {
             user.setAge(rs.getInt("age"));
             user.setEmail(rs.getString("email"));
             user.setUserTitle(rs.getString("user_title"));
+            // 【新增】封装头像路径
+            user.setAvatarPath(rs.getString("avatar_path"));
         }
 
         rs.close();
@@ -174,10 +179,12 @@ public class UsersDao {
     }
 
     // 更新用户信息
+    // 更新用户信息（【修改】新增头像字段更新）
     public void updateUser(User user) throws SQLException, ClassNotFoundException {
         DBManager dbManager = new DBManager();
         Connection connection = dbManager.getConnection();
-        String sql = "UPDATE user SET username = ?, password = ?, sex = ?, age = ?, email = ? WHERE id = ?";
+        // 【修改】SQL新增 avatar_path 字段更新
+        String sql = "UPDATE user SET username = ?, password = ?, sex = ?, age = ?, email = ?, avatar_path = ? WHERE id = ?";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
         preparedStatement.setString(1, user.getUsername());
@@ -185,7 +192,9 @@ public class UsersDao {
         preparedStatement.setString(3, user.getSex());
         preparedStatement.setInt(4, user.getAge());
         preparedStatement.setString(5, user.getEmail());
-        preparedStatement.setString(6, user.getId());
+        // 【新增】设置头像路径参数
+        preparedStatement.setString(6, user.getAvatarPath());
+        preparedStatement.setString(7, user.getId());
 
         preparedStatement.executeUpdate();
         preparedStatement.close();

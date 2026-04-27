@@ -39,6 +39,7 @@ public class UserUpdateServlet extends HttpServlet {
     }
 
     // 处理修改提交
+    // 处理修改提交
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
@@ -49,6 +50,11 @@ public class UserUpdateServlet extends HttpServlet {
         String sex = request.getParameter("sex");
         Integer age = Integer.parseInt(request.getParameter("age"));
         String email = request.getParameter("email");
+        // 【新增】获取头像路径参数
+        String avatarPath = request.getParameter("avatarPath");
+        if (avatarPath == null || avatarPath.trim().isEmpty()) {
+            avatarPath = "/images/default-avatar.png";
+        }
 
         User user = new User();
         user.setId(id);
@@ -57,6 +63,8 @@ public class UserUpdateServlet extends HttpServlet {
         user.setSex(sex);
         user.setAge(age);
         user.setEmail(email);
+        // 【新增】设置头像路径
+        user.setAvatarPath(avatarPath);
 
         try {
             usersDao.updateUser(user);

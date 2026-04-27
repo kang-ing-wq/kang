@@ -14,7 +14,6 @@ public class User {
   private String avatarPath;
   private Integer readChapterNum;
   private Integer readBookNum;
-
   // 无参构造
   public User() {}
 
