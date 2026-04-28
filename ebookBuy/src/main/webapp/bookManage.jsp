@@ -178,6 +178,7 @@
             color: var(--text-primary);
             font-size: 16px;
             font-family: "SimSun", serif;
+            cursor: pointer;
         }
         .magic-btn {
             padding: 10px 25px;
@@ -493,7 +494,7 @@
                 <th>操作</th>
             </tr>
             </thead>
-            <tbody>
+            <tbody id="bookTableBody">
             <c:forEach items="${bookList}" var="book">
                 <tr
                         data-book-id="${book.id}"
@@ -634,6 +635,35 @@
     var editFormModal = document.getElementById('editFormModal');
     var searchInput = document.getElementById('searchInput');
     var typeFilter = document.getElementById('typeFilter');
+    var bookTableBody = document.getElementById('bookTableBody');
+    var allBookRows = bookTableBody.querySelectorAll('tr:not(:has(.table-empty))'); // 缓存所有典籍行
+
+    // ================== 【核心优化】实时筛选函数 ==================
+    function filterBookList() {
+        var keyword = searchInput.value.toLowerCase().trim();
+        var selectedTypeId = typeFilter.value;
+        var hasMatch = false;
+
+        // 遍历所有典籍行，执行筛选
+        allBookRows.forEach(function(row) {
+            var dataset = row.dataset;
+            // 关键词匹配：书名/作者
+            var isKeywordMatch = dataset.title.toLowerCase().includes(keyword) || dataset.author.toLowerCase().includes(keyword);
+            // 分类匹配
+            var isTypeMatch = selectedTypeId === '' || dataset.typeId === selectedTypeId;
+
+            // 同时满足才显示
+            var isShow = isKeywordMatch && isTypeMatch;
+            row.style.display = isShow ? '' : 'none';
+            if (isShow) hasMatch = true;
+        });
+
+        // 无匹配时显示空提示
+        var emptyRow = bookTableBody.querySelector('tr:has(.table-empty)');
+        if (emptyRow) {
+            emptyRow.style.display = hasMatch ? 'none' : '';
+        }
+    }
 
     // ================== 新增弹窗控制 ==================
     function openAddForm() { addFormModal.style.display = 'flex'; }
@@ -659,25 +689,13 @@
     function closeEditForm() { editFormModal.style.display = 'none'; }
     editFormModal.onclick = function(e) { if (e.target === this) closeEditForm(); };
 
-    // ================== 搜索筛选 ==================
-    // 搜索筛选（带排序）
+    // ================== 后端搜索+排序（保留原有逻辑） ==================
     function searchBook() {
         var keyword = searchInput.value.toLowerCase().trim();
         var selectedTypeId = typeFilter.value;
         var sortField = document.getElementById('sortField').value;
         var sortOrder = document.getElementById('sortOrder').value;
-        var rows = document.querySelectorAll('#bookTable tbody tr');
 
-        // 前端筛选逻辑不变
-        rows.forEach(function(row) {
-            if (row.querySelector('.table-empty')) return;
-            var dataset = row.dataset;
-            var isKeywordMatch = dataset.title.toLowerCase().includes(keyword) || dataset.author.toLowerCase().includes(keyword);
-            var isTypeMatch = selectedTypeId === '' || dataset.typeId === selectedTypeId;
-            row.style.display = (isKeywordMatch && isTypeMatch) ? '' : 'none';
-        });
-
-        // 【核心】把排序参数传给后端，刷新页面获取排序后的数据
         // 拼接参数，跳转Servlet重新查询
         var url = "${pageContext.request.contextPath}/bookManage?keyword=" + encodeURIComponent(keyword)
             + "&typeId=" + encodeURIComponent(selectedTypeId)
@@ -687,6 +705,7 @@
         // 跳转刷新，保留搜索和排序状态
         window.location.href = url;
     }
+
     // 重置搜索和排序
     function resetSearch() {
         searchInput.value = '';
@@ -698,6 +717,13 @@
         // 重置后刷新页面
         window.location.href = "${pageContext.request.contextPath}/bookManage";
     }
+
+    // ================== 【核心优化】事件绑定 ==================
+    // 1. 分类切换立刻筛选
+    typeFilter.addEventListener('change', filterBookList);
+    // 2. 关键词输入实时筛选
+    searchInput.addEventListener('input', filterBookList);
+    // 3. 回车依然触发后端搜索
     searchInput.addEventListener('keydown', function(e) { if (e.keyCode === 13) searchBook(); });
 
     // ================== 键盘事件 ==================
@@ -741,8 +767,9 @@
         searchBook();
     }
 
-    // 页面加载时，同步排序箭头状态
+    // 页面加载完成后执行
     window.onload = function() {
+        // 同步排序箭头状态
         var urlParams = new URLSearchParams(window.location.search);
         var sortOrder = urlParams.get('sortOrder');
         if (sortOrder === 'asc') {
@@ -752,6 +779,11 @@
             document.getElementById('sortOrder').value = 'desc';
             document.getElementById('sortArrow').innerText = '↓';
         }
+
+        // 重新缓存典籍行，避免新增/编辑后数据不对
+        allBookRows = bookTableBody.querySelectorAll('tr:not(:has(.table-empty))');
+        // 页面加载后自动执行一次筛选，保证url参数和页面状态一致
+        filterBookList();
     }
 </script>
 </body>

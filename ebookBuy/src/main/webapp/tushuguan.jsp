@@ -4,7 +4,6 @@
 <head>
     <title>Online藏书阁 - 玄元宗</title>
     <style>
-        /* ========== 全局重置与变量 ========== */
         * {
             margin: 0;
             padding: 0;
@@ -35,7 +34,7 @@
             overflow-x: hidden;
         }
 
-        /* ========== 左侧导航栏 ========== */
+        /* 左侧导航栏 */
         .nav-sidebar {
             position: fixed;
             top: 0;
@@ -45,6 +44,7 @@
             background: linear-gradient(180deg, rgba(13, 31, 36, 0.96) 0%, rgba(23, 48, 54, 0.96) 100%);
             border-right: 3px solid var(--gold-dark);
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 40px 0;
             z-index: 999;
             box-shadow: 5px 0 25px rgba(0,0,0,0.85);
@@ -59,6 +59,7 @@
             padding: 0 15px;
             letter-spacing: 5px;
             animation: logoBreath 3s ease-in-out infinite;
+            white-space: nowrap;
         }
         @keyframes logoBreath {
             0%, 100% { text-shadow: 0 0 20px var(--gold-mid), 0 0 40px rgba(201, 168, 102, 0.6); }
@@ -72,6 +73,7 @@
             letter-spacing: 2px;
             border-bottom: 1px solid rgba(201, 168, 102, 0.3);
             margin-top: 20px;
+            white-space: nowrap;
         }
         .nav-sidebar .nav-item {
             display: block;
@@ -83,6 +85,9 @@
             border-left: 5px solid transparent;
             transition: all 0.4s ease;
             letter-spacing: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .nav-sidebar .nav-item:hover, .nav-sidebar .nav-item.active {
             background: rgba(138, 163, 184, 0.12);
@@ -95,11 +100,9 @@
         .nav-sidebar .nav-item:nth-child(9) { color: var(--blue); }
         .nav-sidebar .nav-item:nth-child(10) { color: var(--red); }
         .nav-sidebar .nav-item:nth-child(11) { color: var(--green); }
-        .nav-sidebar .nav-item:nth-child(n+8):hover {
-            text-shadow: 0 0 10px currentColor;
-        }
+        .nav-sidebar .nav-item:nth-child(n+8):hover { text-shadow: 0 0 10px currentColor; }
 
-        /* ========== 右侧主内容区 ========== */
+        /* 右侧主内容区 */
         .content-wrap {
             margin-left: 280px;
             min-height: 100vh;
@@ -128,11 +131,11 @@
             flex-wrap: wrap;
         }
         .magic-btn {
-            padding: 15px 40px;
+            padding: 12px 25px;
             background: linear-gradient(90deg, #173036, #244a52);
             color: var(--text-primary);
             text-decoration: none;
-            font-size: 20px;
+            font-size: 18px;
             border: 2px solid var(--gold-dark);
             border-radius: 5px;
             transition: all 0.3s ease;
@@ -142,6 +145,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             position: relative;
             overflow: hidden;
+            display: inline-block;
         }
         .magic-btn::before {
             content: "";
@@ -161,40 +165,41 @@
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(201, 168, 102, 0.6);
         }
-        .magic-btn:hover::before {
-            left: 100%;
+        .magic-btn:hover::before { left: 100%; }
+        .btn-sm { padding: 8px 15px; font-size: 16px; }
+        .btn-danger { background: linear-gradient(90deg, #5a1a1a, #7a2a2a); border-color: #a83232; }
+        .btn-danger:hover { background: linear-gradient(90deg, #a83232, #c84242); color: #fff; }
+        .btn-success { background: linear-gradient(90deg, #1a5a2a, #2a7a3a); border-color: var(--green); }
+        .btn-success:hover { background: linear-gradient(90deg, var(--green), #8ab89a); color: var(--bg-deepest); }
+        .btn-warning {
+            background: linear-gradient(90deg, #664a10, #886a20);
+            border-color: #c9a866;
         }
-        .btn-sm {
-            padding: 8px 15px;
-            font-size: 16px;
-        }
-        .btn-danger {
-            background: linear-gradient(90deg, #5a1a1a, #7a2a2a);
-            border-color: #a83232;
-            box-shadow: 0 0 10px rgba(168, 50, 50, 0.3);
-        }
-        .btn-danger:hover {
-            background: linear-gradient(90deg, #a83232, #c84242);
-            color: #fff;
-            box-shadow: 0 0 20px rgba(168, 50, 50, 0.6);
+        .btn-warning:hover {
+            background: linear-gradient(90deg, #c9a866, #e6c888);
+            color: #0d1f24;
         }
 
-        /* ========== 典籍卡片 ========== */
+        /* 典籍卡片（左图右文布局） */
         .book-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: 35px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
             margin-top: 30px;
         }
         .book-card {
             background: linear-gradient(180deg, rgba(23, 48, 54, 0.9) 0%, rgba(13, 31, 36, 0.94) 100%);
             border: 2px solid var(--gold-dark);
             border-radius: 10px;
-            padding: 30px 25px;
+            padding: 20px;
             transition: all 0.4s ease;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.35), 0 6px 18px rgba(0,0,0,0.5);
             position: relative;
             overflow: hidden;
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+            min-height: 260px;
         }
         .book-card::before {
             content: "";
@@ -216,40 +221,67 @@
             border-color: var(--gold-light);
             box-shadow: inset 0 0 20px rgba(0,0,0,0.35), 0 0 20px rgba(201, 168, 102, 0.4);
         }
+        .card-cover-wrap {
+            width: 180px;
+            height: 100%;
+            flex-shrink: 0;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid var(--gold-dark);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .card-cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .card-content-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            height: 100%;
+            width: 100%;
+        }
         .book-card h3 {
-            font-size: 26px;
+            font-size: 28px;
             color: var(--text-primary);
-            margin-bottom: 12px;
+            margin-bottom: 4px;
             letter-spacing: 2px;
             text-shadow: 0 0 12px rgba(201, 168, 102, 0.6);
             transition: all 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .book-card:hover h3 {
-            text-shadow: 0 0 18px var(--gold-light);
-        }
+        .book-card:hover h3 { text-shadow: 0 0 18px var(--gold-light); }
         .book-card .author {
-            font-size: 18px;
+            font-size: 19px;
             color: var(--gold-mid);
-            margin-bottom: 20px;
+            margin-bottom: 8px;
             font-style: italic;
             letter-spacing: 1px;
         }
         .book-card .summary {
             font-size: 16px;
-            line-height: 1.8;
+            line-height: 1.5;
             color: var(--text-secondary);
-            margin-bottom: 20px;
+            margin-bottom: 8px;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
         .book-card .info {
             font-size: 15px;
             color: var(--text-tertiary);
-            line-height: 2;
-            margin-bottom: 20px;
+            line-height: 1.6;
+            margin-bottom: auto;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
         }
+        .book-card .info p { margin: 0; white-space: nowrap; }
         .book-card .info p span.hot-times {
             background: var(--gold-gradient);
             -webkit-background-clip: text;
@@ -265,12 +297,17 @@
         }
         .book-card .card-btn-group {
             display: flex;
-            gap: 8px;
-            justify-content: space-between;
-            flex-wrap: wrap;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .book-card .card-btn-group .magic-btn {
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 18px;
         }
 
-        /* ========== 弹窗通用样式 ========== */
+        /* 弹窗通用样式 */
         .form-modal {
             display: none;
             position: fixed;
@@ -291,6 +328,7 @@
             box-shadow: 0 0 50px rgba(201, 168, 102, 0.35);
             max-height: 90vh;
             overflow-y: auto;
+            position: relative;
         }
         .form-card h3 {
             text-align: center;
@@ -300,9 +338,7 @@
             letter-spacing: 5px;
             text-shadow: 0 0 20px var(--gold-mid);
         }
-        .form-row {
-            margin-bottom: 20px;
-        }
+        .form-row { margin-bottom: 20px; }
         .form-row label {
             display: block;
             font-size: 18px;
@@ -325,15 +361,7 @@
             border-color: var(--gold-mid);
             box-shadow: 0 0 12px rgba(201, 168, 102, 0.5);
         }
-        .form-row textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        .form-row p {
-            font-size: 16px;
-            line-height: 1.6;
-            color: var(--text-secondary);
-        }
+        .form-row textarea { resize: vertical; min-height: 80px; }
         .form-btn-group {
             display: flex;
             gap: 20px;
@@ -341,33 +369,21 @@
             margin-top: 30px;
         }
         .add-card { width: 700px; }
-        .detail-card { width: 700px; }
+        .detail-card { width: 1000px; max-width: 90vw; }
 
-        /* ========== 沉浸式阅读界面样式 ========== */
+        /* 沉浸式阅读 */
         .read-page {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 99999;
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999;
             transition: all 0.3s ease;
-            --read-bg: #f5f1e6;
-            --read-text: #333333;
-            --read-secondary: #666666;
-            --read-border: #d9d2c3;
-            --read-btn-bg: #ffffff;
-            --read-btn-hover: #f0e6d2;
-            --read-drawer-bg: #ffffff;
-            background: var(--read-bg);
-            color: var(--read-text);
+            --read-bg: #f5f1e6; --read-text: #333333; --read-secondary: #666666; --read-border: #d9d2c3;
+            --read-btn-bg: #ffffff; --read-btn-hover: #f0e6d2; --read-drawer-bg: #ffffff;
+            background: var(--read-bg); color: var(--read-text);
         }
-        .read-page.theme-default { --read-bg: #f5f1e6; --read-text: #333333; --read-secondary: #666666; --read-border: #d9d2c3; --read-drawer-bg: #ffffff; }
-        .read-page.theme-eye { --read-bg: #e9f3e4; --read-text: #2d3e2a; --read-secondary: #5a6b57; --read-border: #bcd2b4; --read-drawer-bg: #f4faf1; }
-        .read-page.theme-dark { --read-bg: #1a1a1a; --read-text: #e0e0e0; --read-secondary: #a0a0a0; --read-border: #333333; --read-drawer-bg: #2a2a2a; }
-        .read-page.theme-blue { --read-bg: #e4edf5; --read-text: #2a3a4a; --read-secondary: #5a6a7a; --read-border: #b4c4d4; --read-drawer-bg: #f0f5fa; }
-        .read-page.theme-zongmen { --read-bg: #0f252b; --read-text: #f0e2c0; --read-secondary: #d4c7b0; --read-border: #a88a44; --read-drawer-bg: #173036; }
+        .read-page.theme-default { --read-bg: #f5f1e6; --read-text: #333333; }
+        .read-page.theme-eye { --read-bg: #e9f3e4; --read-text: #2d3e2a; }
+        .read-page.theme-dark { --read-bg: #1a1a1a; --read-text: #e0e0e0; }
+        .read-page.theme-blue { --read-bg: #e4edf5; --read-text: #2a3a4a; }
+        .read-page.theme-zongmen { --read-bg: #0f252b; --read-text: #f0e2c0; --read-border: #a88a44; --read-drawer-bg: #173036; }
 
         .read-sidebar { position: fixed; top: 50%; right: 30px; transform: translateY(-50%); display: flex; flex-direction: column; gap: 20px; z-index: 100; }
         .read-sidebar-btn { width: 50px; height: 50px; border-radius: 50%; background: var(--read-btn-bg); border: 1px solid var(--read-border); display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -404,94 +420,87 @@
         .read-book-title { text-align: center; font-size: 32px; color: var(--read-text); margin-bottom: 15px; letter-spacing: 5px; font-weight: bold; }
         .read-chapter-title { text-align: center; font-size: 24px; color: var(--read-text); margin-bottom: 40px; letter-spacing: 3px; font-weight: bold; }
         .read-content { font-size: 18px; line-height: 1.8; color: var(--read-text); font-family: "SimSun", serif; white-space: pre-wrap; word-break: break-word; margin-bottom: 60px; transition: all 0.2s ease; }
-        .read-content p { margin-bottom: 20px; text-indent: 2em; }
         .read-footer { display: flex; gap: 30px; justify-content: center; padding: 30px 0; border-top: 1px solid var(--read-border); }
         .footer-btn { padding: 12px 60px; background: var(--read-btn-bg); border: 1px solid var(--read-border); border-radius: 5px; color: var(--read-text); font-size: 18px; cursor: pointer; transition: all 0.2s ease; letter-spacing: 2px; }
         .footer-btn:hover { background: var(--read-btn-hover); transform: translateY(-2px); }
 
-        /* ========== 头像与用户卡片样式 ========== */
+        /* 头像与用户卡片 */
         .avatar-wrap { display: flex; flex-direction: column; align-items: center; padding: 30px 0 20px; border-bottom: 1px solid rgba(201, 168, 102, 0.3); margin-bottom: 20px; }
-        .avatar-box { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--gold-mid); overflow: hidden; box-shadow: 0 0 20px rgba(201, 168, 102, 0.5); margin-bottom: 10px; cursor: pointer; transition: all 0.3s ease; }
-        .avatar-box:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(201, 168, 102, 0.8); }
+        .avatar-box { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--gold-mid); overflow: hidden; box-shadow: 0 0 20px rgba(201,168,102,0.5); margin-bottom: 10px; cursor: pointer; transition: all 0.3s ease; }
+        .avatar-box:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(201,168,102,0.8); }
         .user-avatar { width: 100%; height: 100%; object-fit: cover; }
         .guest-avatar { filter: grayscale(0.7); opacity: 0.7; }
         .user-name { color: var(--text-primary); font-size: 20px; font-weight: bold; letter-spacing: 2px; margin-bottom: 5px; }
-        .user-title { color: var(--gold-mid); font-size: 14px; letter-spacing: 1px; text-shadow: 0 0 10px rgba(201, 168, 102, 0.5); }
+        .user-title { color: var(--gold-mid); font-size: 14px; letter-spacing: 1px; text-shadow: 0 0 10px rgba(201,168,102,0.5); }
         .user-tip { color: var(--text-tertiary); font-size: 14px; letter-spacing: 1px; }
 
-        .user-card { position: fixed; top: 20px; left: 280px; width: 320px; background: linear-gradient(180deg, var(--bg-light) 0%, var(--bg-deepest) 100%); border: 3px solid var(--gold-mid); border-radius: 10px; box-shadow: 0 0 30px rgba(0,0,0,0.8); z-index: 99999; padding: 25px; opacity: 0; visibility: hidden; transform: translateX(-10px); transition: all 0.3s ease; }
+        .user-card {
+            position: fixed; top: 20px; left: 280px; width: 320px;
+            background: linear-gradient(180deg, var(--bg-light) 0%, var(--bg-deepest) 100%);
+            border: 3px solid var(--gold-mid); border-radius: 10px; box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            z-index: 99999; padding: 25px; opacity: 0; visibility: hidden; transform: translateX(-10px); transition: all 0.3s ease;
+        }
         .card-show { opacity: 1; visibility: visible; transform: translateX(0); }
-        .card-header { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(201, 168, 102, 0.3); }
+        .card-header { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(201,168,102,0.3); }
         .card-avatar { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--gold-mid); object-fit: cover; }
         .card-user-info { flex: 1; }
         .card-username { color: var(--text-primary); font-size: 22px; font-weight: bold; letter-spacing: 2px; margin-bottom: 5px; }
         .card-title { color: var(--gold-mid); font-size: 14px; }
-        .card-data { display: flex; justify-content: space-around; padding: 15px 0; border-bottom: 1px solid rgba(201, 168, 102, 0.3); margin-bottom: 20px; }
+        .card-data { display: flex; justify-content: space-around; padding: 15px 0; border-bottom: 1px solid rgba(201,168,102,0.3); margin-bottom: 20px; }
         .data-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .data-num { color: var(--gold-light); font-size: 24px; font-weight: bold; text-shadow: 0 0 10px rgba(201, 168, 102, 0.6); }
+        .data-num { color: var(--gold-light); font-size: 24px; font-weight: bold; text-shadow: 0 0 10px rgba(201,168,102,0.6); }
         .data-label { color: var(--text-secondary); font-size: 14px; }
         .card-btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
-        .card-btn { flex: 1; padding: 10px 0; background: linear-gradient(90deg, #173036, #244a52); border: 1px solid var(--gold-dark); border-radius: 5px; color: var(--text-primary); font-size: 14px; text-align: center; text-decoration: none; cursor: pointer; transition: all 0.3s ease; font-family: "SimSun", serif; }
+        .card-btn {
+            flex: 1; padding: 10px 0; background: linear-gradient(90deg, #173036, #244a52); border: 1px solid var(--gold-dark);
+            border-radius: 5px; color: var(--text-primary); font-size: 14px; text-align: center; text-decoration: none;
+            cursor: pointer; transition: all 0.3s ease; font-family: "SimSun", serif;
+        }
         .card-btn:hover { background: linear-gradient(90deg, var(--gold-mid), var(--gold-light)); color: var(--bg-deepest); font-weight: bold; }
-        .card-footer { border-top: 1px solid rgba(201, 168, 102, 0.3); padding-top: 15px; text-align: center; }
+        .card-footer { border-top: 1px solid rgba(201,168,102,0.3); padding-top: 15px; text-align: center; }
         .logout-btn { color: var(--red); text-decoration: none; font-size: 16px; letter-spacing: 2px; transition: all 0.3s ease; }
-        .logout-btn:hover { color: #ff6666; text-shadow: 0 0 10px rgba(255, 102, 102, 0.6); }
+        .logout-btn:hover { color: #ff6666; text-shadow: 0 0 10px rgba(255,102,102,0.6); }
 
-        /* ========== 藏经袋（购物车）样式 ========== */
+        /* 藏经袋 */
         .cart-icon {
             position: fixed; top: 30px; right: 30px; width: 60px; height: 60px;
-            background: linear-gradient(180deg, rgba(23, 48, 54, 0.95) 0%, rgba(13, 31, 36, 0.98) 100%);
+            background: linear-gradient(180deg, rgba(23,48,54,0.95) 0%, rgba(13,31,36,0.98) 100%);
             border: 2px solid #c9a866; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 28px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 15px rgba(201, 168, 102, 0.2); z-index: 999;
+            font-size: 28px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 15px rgba(201,168,102,0.2); z-index: 999;
         }
-        .cart-icon:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(201, 168, 102, 0.5); }
+        .cart-icon:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(201,168,102,0.5); }
         .cart-badge {
             position: absolute; top: -5px; right: -5px; min-width: 22px; height: 22px;
             background: #ff4444; color: #fff; border-radius: 50%; font-size: 12px;
-            display: flex; align-items: center; justify-content: center; font-weight: bold;
-            box-shadow: 0 0 10px rgba(255, 68, 68, 0.6);
+            display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 0 10px rgba(255,68,68,0.6);
         }
         .cart-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.7); z-index: 99999; justify-content: flex-end;
         }
         .cart-card {
-            width: 500px; height: 100vh; background: linear-gradient(180deg, rgba(23, 48, 54, 0.98) 0%, rgba(13, 31, 36, 0.99) 100%);
+            width: 500px; height: 100vh; background: linear-gradient(180deg, rgba(23,48,54,0.98) 0%, rgba(13,31,36,0.99) 100%);
             border-left: 3px solid #c9a866; box-shadow: -5px 0 30px rgba(0,0,0,0.8); display: flex; flex-direction: column;
         }
-        .cart-header {
-            display: flex; justify-content: space-between; align-items: center; padding: 30px;
-            border-bottom: 1px solid rgba(201, 168, 102, 0.3);
-        }
+        .cart-header { display: flex; justify-content: space-between; align-items: center; padding: 30px; border-bottom: 1px solid rgba(201,168,102,0.3); }
         .cart-header h3 { font-size: 28px; color: #f0e2c0; letter-spacing: 5px; text-shadow: 0 0 15px #c9a866; margin: 0; }
         .cart-close { font-size: 36px; color: #c9a866; cursor: pointer; transition: all 0.3s ease; }
         .cart-close:hover { color: #fff; transform: rotate(90deg); }
         .cart-body { flex: 1; overflow-y: auto; padding: 20px 30px; }
         .cart-empty { text-align: center; padding: 80px 0; color: #d4c7b0; font-size: 18px; line-height: 2; }
         .cart-list { display: flex; flex-direction: column; }
-        .cart-item {
-            display: flex; align-items: center; gap: 15px; padding: 15px 0;
-            border-bottom: 1px solid rgba(201, 168, 102, 0.2); flex-wrap: wrap;
-        }
+        .cart-item { display: flex; align-items: center; gap: 15px; padding: 15px 0; border-bottom: 1px solid rgba(201,168,102,0.2); flex-wrap: wrap; }
         .cart-item-info { flex: 1; min-width: 200px; }
         .cart-item-title { font-size: 18px; color: #f0e2c0; margin-bottom: 5px; }
         .cart-item-author { font-size: 14px; color: #d4c7b0; margin-bottom: 8px; }
         .cart-item-price { color: #e6c888; font-size: 16px; font-weight: bold; }
         .cart-item-num { display: flex; align-items: center; gap: 10px; }
-        .num-btn {
-            width: 30px; height: 30px; background: rgba(201, 168, 102, 0.2);
-            border: 1px solid #c9a866; border-radius: 5px; color: #f0e2c0; cursor: pointer;
-        }
+        .num-btn { width: 30px; height: 30px; background: rgba(201,168,102,0.2); border: 1px solid #c9a866; border-radius: 5px; color: #f0e2c0; cursor: pointer; }
         .num-btn:hover { background: #c9a866; color: #0d1f24; }
-        .num-input {
-            width: 50px; text-align: center; background: rgba(255,255,255,0.1);
-            border: 1px solid #c9a866; border-radius: 5px; color: #f0e2c0; padding: 5px;
-        }
-        .cart-item-delete {
-            color: #ff6666; cursor: pointer; font-size: 20px; transition: all 0.3s ease; margin-left: 10px;
-        }
-        .cart-item-delete:hover { transform: scale(1.2); text-shadow: 0 0 10px rgba(255, 102, 102, 0.6); }
-        .cart-footer { padding: 25px 30px; border-top: 1px solid rgba(201, 168, 102, 0.3); }
+        .num-input { width: 50px; text-align: center; background: rgba(255,255,255,0.1); border: 1px solid #c9a866; border-radius: 5px; color: #f0e2c0; padding: 5px; }
+        .cart-item-delete { color: #ff6666; cursor: pointer; font-size: 20px; transition: all 0.3s ease; margin-left: 10px; }
+        .cart-item-delete:hover { transform: scale(1.2); text-shadow: 0 0 10px rgba(255,102,102,0.6); }
+        .cart-footer { padding: 25px 30px; border-top: 1px solid rgba(201,168,102,0.3); }
         .cart-total { text-align: right; font-size: 20px; color: #f0e2c0; margin-bottom: 20px; }
         .cart-total span { color: #e6c888; font-weight: bold; font-size: 24px; }
         .cart-btn-group { display: flex; gap: 15px; justify-content: space-between; }
@@ -500,10 +509,7 @@
             color: var(--text-primary); border: 2px solid var(--gold-dark); border-radius: 5px;
             cursor: pointer; font-family: "SimSun", serif; transition: all 0.3s ease;
         }
-        .magic-btn-sm:hover {
-            background: linear-gradient(90deg, var(--gold-mid), var(--gold-light));
-            color: var(--bg-deepest); font-weight: bold; transform: translateY(-3px);
-        }
+        .magic-btn-sm:hover { background: linear-gradient(90deg, var(--gold-mid), var(--gold-light)); color: var(--bg-deepest); font-weight: bold; transform: translateY(-3px); }
         .magic-btn-sm.btn-danger { background: linear-gradient(90deg, #5a1a1a, #7a2a2a); border-color: #a83232; }
         .magic-btn-sm.btn-danger:hover { background: linear-gradient(90deg, #a83232, #c84242); color: #fff; }
 
@@ -514,16 +520,16 @@
         }
         .add-cart-btn:hover { background: linear-gradient(90deg, #c9a866, #e6c888); color: #0d1f24; font-weight: bold; }
 
-        /* ========== 符文波纹特效 ========== */
+        /* 符文特效 */
         .sword-wave {
             position: fixed; width: 60px; height: 60px; border: 3px solid #c9a866; border-radius: 50%;
-            pointer-events: none; z-index: 99998; box-shadow: 0 0 15px #c9a866, 0 0 30px rgba(201, 168, 102, 0.6);
+            pointer-events: none; z-index: 99998; box-shadow: 0 0 15px #c9a866, 0 0 30px rgba(201,168,102,0.6);
         }
         @keyframes waveExpand { 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(2.0); } }
         .wave-animate { animation: waveExpand 0.8s ease-out forwards; }
         .rune-text {
             position: fixed; font-family: "SimSun", "KaiTi", serif; font-size: 32px; font-weight: bold; color: #c9a866;
-            text-shadow: 0 0 10px #c9a866, 0 0 20px rgba(201, 168, 102, 0.8); pointer-events: none;
+            text-shadow: 0 0 10px #c9a866, 0 0 20px rgba(201,168,102,0.8); pointer-events: none;
             z-index: 99999; user-select: none; white-space: nowrap;
         }
         @keyframes runeFloat { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-120px) scale(1.2); } }
@@ -560,8 +566,7 @@
     <a href="login.jsp" class="nav-item">🔐 登录</a>
     <a href="register.jsp" class="nav-item">📝 注册成为藏书阁成员</a>
     <a href="tushuguan" class="nav-item active">📚 全本藏书</a>
-    <!-- 掌阁典籍总控台 仅管理员可见 -->
-    <a href="bookManage" class="nav-item active">📋 典籍总录·管理</a>
+    <a href="bookManage" class="nav-item">📋 典籍总录·管理</a>
     <a href="javascript:openAddForm()" class="nav-item">✍️ 新增典籍</a>
     <a href="${pageContext.request.contextPath}/chapterAdd" class="nav-item">📖 录入章节</a>
     <c:if test="${not empty sessionScope.loginUser}">
@@ -627,7 +632,6 @@
 
 <!-- 右侧主内容区 -->
 <div class="content-wrap">
-    <!-- 右上角藏经袋图标 -->
     <div class="cart-icon" id="cartIcon">
         🛒
         <span class="cart-badge" id="cartBadge">0</span>
@@ -647,22 +651,35 @@
                  data-title="${book.bookTitle}"
                  data-author="${book.bookAuthor}"
                  data-summary="${book.bookSummary}"
+                 data-type="${book.typeId}"
                  data-pubyear="${book.bookPubYear}"
                  data-times="${book.downloadTimes}"
-                 data-format="${book.bookFormat}">
-                <h3>${book.bookTitle}</h3>
-                <p class="author">作者：${book.bookAuthor}</p>
-                <p class="summary">${book.bookSummary}</p>
-                <div class="info">
-                    <p>出版年份：${book.bookPubYear}</p>
-                    <p>传阅次数：<span class="hot-times">${book.downloadTimes}</span> 次</p>
-                    <p>典籍格式：${book.bookFormat}</p>
+                 data-format="${book.bookFormat}"
+                 data-price="${book.price}"
+                 data-cover="${book.bookCover}">
+                <div class="card-cover-wrap">
+                    <c:choose>
+                        <c:when test="${not empty book.bookCover}">
+                            <img src="${pageContext.request.contextPath}${book.bookCover}" class="card-cover-img" alt="${book.bookTitle}">
+                        </c:when>
+                        <c:otherwise>
+                            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='260' viewBox='0 0 180 260'%3E%3Crect width='180' height='260' fill='%233d5a5a'/%3E%3Ctext x='45' y='130' font-family='SimSun' font-size='18' fill='%23c9a866'%3E无封面%3C/text%3E%3C/svg%3E"
+                                 class="card-cover-img" alt="默认封面">
+                        </c:otherwise>
+                    </c:choose>
                 </div>
-                <div class="card-btn-group">
-                    <button class="add-cart-btn" onclick="addToCart(${book.id})">请购入袋</button>
-                    <button class="magic-btn btn-sm" onclick="openDetailModal(this.closest('.book-card'))">查看详情</button>
-                    <button class="magic-btn btn-sm start-read-btn" onclick="openReadModal(this.closest('.book-card'))">开始阅读</button>
-                    <a href="bookDelete?id=${book.id}" class="magic-btn btn-sm btn-danger" onclick="return confirm('确定要销毁这部典籍吗？')">销毁典籍</a>
+                <div class="card-content-wrap">
+                    <h3>${book.bookTitle}</h3>
+                    <p class="author">作者：${book.bookAuthor}</p>
+                    <p class="summary">${book.bookSummary}</p>
+                    <div class="info">
+                        <p>出版年份：${book.bookPubYear}</p>
+                        <p>传阅次数：<span class="hot-times">${book.downloadTimes}</span> 次</p>
+                        <p>典籍格式：${book.bookFormat}</p>
+                    </div>
+                    <div class="card-btn-group">
+                        <button class="magic-btn btn-sm" onclick="openDetailModal(this.closest('.book-card'))">查看详情</button>
+                    </div>
                 </div>
             </div>
         </c:forEach>
@@ -731,22 +748,33 @@
 <!-- 典籍详情弹窗 -->
 <div class="form-modal" id="detailModal">
     <div class="form-card detail-card">
-        <h3 id="detail-book-title">典籍详情</h3>
-        <div class="form-row"><label>典籍名称</label><p id="detail-author">作者：</p></div>
-        <div class="form-row"><label>典籍简介</label><p id="detail-summary"></p></div>
-        <div class="form-row">
-            <label>出版信息</label>
-            <p id="detail-pubyear"></p><p id="detail-times"></p><p id="detail-format"></p>
+        <span class="detail-close" onclick="closeDetailModal()" style="position: absolute; top: 20px; right: 30px; font-size: 40px; color: var(--gold-mid); cursor: pointer; line-height: 1; transition: all 0.3s ease;">×</span>
+        <div class="detail-header" style="display: flex; gap: 40px; margin-bottom: 40px; padding-bottom: 30px; border-bottom: 1px solid rgba(201, 168, 102, 0.3);">
+            <div class="detail-cover-wrap" style="width: 200px; height: 270px; flex-shrink: 0; border-radius: 10px; overflow: hidden; border: 2px solid var(--gold-dark); box-shadow: 0 8px 20px rgba(0,0,0,0.6);">
+                <img id="detail-cover" src="" alt="典籍封面" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            <div class="detail-info-wrap" style="flex: 1; display: flex; flex-direction: column; gap: 15px;">
+                <h2 id="detail-book-title" style="font-size: 36px; color: var(--text-primary); font-weight: bold; letter-spacing: 3px; text-shadow: 0 0 15px var(--gold-mid);"></h2>
+                <div id="detail-author" style="font-size: 20px; color: var(--gold-mid);"></div>
+                <div class="detail-meta" style="display: flex; flex-wrap: wrap; gap: 20px 30px; font-size: 16px; color: var(--text-secondary);" id="detail-meta"></div>
+                <div class="detail-data" style="display: flex; gap: 40px; font-size: 24px; color: var(--gold-light); font-weight: bold; margin: 10px 0;" id="detail-data"></div>
+                <div class="detail-btn-group" style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: auto;">
+                    <button class="magic-btn" id="detail-cart-btn" data-book-id="">请购入袋</button>
+                    <button class="magic-btn btn-sm" onclick="openReadModalFromDetail()">开始阅读</button>
+                    <a href="#" class="magic-btn btn-sm btn-danger" id="detail-del-btn" onclick="return confirm('确定要销毁这部典籍吗？此操作不可恢复！')">销毁典籍</a>
+                </div>
+            </div>
         </div>
-        <div class="form-btn-group">
-            <button class="magic-btn" onclick="closeDetailModal()">关闭</button>
-            <button class="magic-btn btn-danger" id="detail-del-btn">销毁典籍</button>
+        <div class="detail-summary-wrap">
+            <h3 style="font-size: 28px; color: var(--text-primary); font-weight: bold; letter-spacing: 2px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid rgba(201, 168, 102, 0.3);">作品简介</h3>
+            <div id="detail-summary" style="font-size: 18px; line-height: 1.8; color: var(--text-secondary); background: rgba(0,0,0,0.2); padding: 25px; border-radius: 10px;"></div>
         </div>
     </div>
 </div>
 
 <!-- 沉浸式阅读界面 -->
 <div id="readPage" class="read-page">
+    <!-- 侧边栏、抽屉、正文等（原样保留） -->
     <div class="read-sidebar">
         <div class="read-sidebar-btn" id="catalogBtn" title="目录">📑</div>
         <div class="read-sidebar-btn" id="settingBtn" title="设置">⚙️</div>
@@ -844,6 +872,7 @@
     var settleBtn = document.getElementById('settleBtn');
 
     var currentBookId = null;
+    var currentDetailCard = null;
     var currentChapterList = [];
     var currentChapterIndex = 0;
     var isLogin = ${not empty sessionScope.loginUser};
@@ -893,23 +922,40 @@
 
     // ================== 详情弹窗 ==================
     function openDetailModal(card) {
-        document.getElementById('detail-book-title').innerText = card.dataset.title;
-        document.getElementById('detail-author').innerText = '作者：' + card.dataset.author;
-        document.getElementById('detail-summary').innerText = card.dataset.summary;
-        document.getElementById('detail-pubyear').innerText = '出版年份：' + card.dataset.pubyear;
-        document.getElementById('detail-times').innerText = '传阅次数：' + card.dataset.times + ' 次';
-        document.getElementById('detail-format').innerText = '典籍格式：' + card.dataset.format;
-        document.getElementById('detail-del-btn').setAttribute('data-book-id', card.dataset.bookId);
+        currentDetailCard = card;
+        var ds = card.dataset;
+        var typeMap = {'1':'玄幻修真','2':'科幻科技','3':'历史武侠','4':'经典文学'};
+
+        var coverImg = document.getElementById('detail-cover');
+        if (ds.cover) {
+            coverImg.src = '${pageContext.request.contextPath}' + ds.cover;
+        } else {
+            coverImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='270' viewBox='0 0 200 270'%3E%3Crect width='200' height='270' fill='%233d5a5a'/%3E%3Ctext x='50' y='140' font-family='SimSun' font-size='18' fill='%23c9a866'%3E无封面%3C/text%3E%3C/svg%3E";
+        }
+
+        document.getElementById('detail-book-title').innerText = ds.title;
+        document.getElementById('detail-author').innerText = '作者：' + ds.author;
+        document.getElementById('detail-meta').innerHTML = '<span>' + (typeMap[ds.type] || '未分类') + '</span> | <span>出版：' + ds.pubyear + '</span> | <span>' + ds.format.toUpperCase() + '</span>';
+        document.getElementById('detail-data').innerHTML =
+            '<div style="display:flex;flex-direction:column;gap:5px;"><span style="font-size:14px;color:var(--text-tertiary);">价格</span><span>' + (ds.price || '0.00') + ' 灵石</span></div>' +
+            '<div style="display:flex;flex-direction:column;gap:5px;"><span style="font-size:14px;color:var(--text-tertiary);">传阅次数</span><span>' + ds.times + '</span></div>';
+        document.getElementById('detail-summary').innerText = ds.summary || '暂无简介';
+
+        document.getElementById('detail-cart-btn').setAttribute('data-book-id', ds.bookId);
+        document.getElementById('detail-del-btn').href = 'bookDelete?id=' + ds.bookId;
+
         detailModal.style.display = 'flex';
     }
+
+    function openReadModalFromDetail() {
+        if (currentDetailCard) {
+            closeDetailModal();
+            openReadModal(currentDetailCard);
+        }
+    }
+
     function closeDetailModal() { detailModal.style.display = 'none'; }
     detailModal.onclick = function(e) { if (e.target === detailModal) closeDetailModal(); };
-    document.getElementById('detail-del-btn').onclick = function() {
-        var bookId = this.getAttribute('data-book-id');
-        if (confirm('确定要销毁这部典籍吗？此操作不可恢复！')) {
-            window.location.href = '${pageContext.request.contextPath}/bookDelete?id=' + bookId;
-        }
-    };
 
     // ================== 沉浸式阅读 ==================
     function openReadModal(bookCard) {
@@ -919,7 +965,8 @@
             bookId = urlParams.get('targetBookId');
         }
         if (!bookId || isNaN(bookId) || Number(bookId) <= 0) {
-            alert("书籍ID无效"); return;
+            alert("书籍ID无效");
+            return;
         }
         currentBookId = Number(bookId);
         document.getElementById('read-book-title').innerText = bookCard.dataset.title;
@@ -929,6 +976,7 @@
         renderChapterSelect();
         loadChapterList(currentBookId);
     }
+
     function loadChapterList(bookId) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', '${pageContext.request.contextPath}/bookContent?action=list&bookId=' + bookId, true);
@@ -940,18 +988,26 @@
                         currentChapterList = res.data;
                         renderChapterSelect();
                         renderCatalogList();
-                    } else { alert(res.msg); closeReadModal(); }
-                } catch (e) { alert("解析错误"); closeReadModal(); }
+                    } else {
+                        alert(res.msg);
+                        closeReadModal();
+                    }
+                } catch (e) {
+                    alert("解析错误");
+                    closeReadModal();
+                }
             }
         };
         xhr.send();
     }
+
     function closeReadModal() {
         readPage.style.display = 'none';
         document.body.style.overflow = 'auto';
         closeAllDrawer();
         window.history.replaceState({}, document.title, window.location.pathname);
     }
+
     function renderChapterSelect() {
         var html = '';
         for (var i = 0; i < currentChapterList.length; i++) {
@@ -960,6 +1016,7 @@
         }
         chapterSelect.innerHTML = html;
     }
+
     function renderCatalogList() {
         var html = '';
         for (var i = 0; i < currentChapterList.length; i++) {
@@ -968,13 +1025,13 @@
         }
         catalogList.innerHTML = html;
     }
+
     function loadChapterContent() {
         var selectedChapterNum = chapterSelect.value;
         if (!selectedChapterNum) return;
         currentChapterIndex = chapterSelect.selectedIndex;
         readContent.innerText = '正在加载章节内容...';
         updateCatalogActive();
-
         var xhr = new XMLHttpRequest();
         xhr.open('GET', '${pageContext.request.contextPath}/bookContent?action=content&bookId=' + currentBookId + '&chapterNum=' + selectedChapterNum, true);
         xhr.onreadystatechange = function() {
@@ -983,16 +1040,13 @@
                     try {
                         var res = JSON.parse(xhr.responseText);
                         if (res.code === 200) {
-                            // 使用后端返回的字段名
-                            document.getElementById('read-chapter-title').innerText =
-                                '第' + res.data.chapterNum + '章 ' + res.data.chapterTitle;
+                            document.getElementById('read-chapter-title').innerText = '第' + res.data.chapterNum + '章 ' + res.data.chapterTitle;
                             readContent.innerText = res.data.chapterContent;
                         } else {
                             alert(res.msg);
                         }
                     } catch (e) {
                         alert('数据解析失败，请刷新页面重试');
-                        console.error('JSON解析错误：', e);
                     }
                 } else {
                     alert('请求失败，服务器错误：' + xhr.status);
@@ -1001,20 +1055,34 @@
         };
         xhr.send();
     }
+
     function jumpToChapter(index) {
-        if (index < 0 || index >= currentChapterList.length) { alert('已无更多章节'); return; }
+        if (index < 0 || index >= currentChapterList.length) {
+            alert('已无更多章节');
+            return;
+        }
         chapterSelect.selectedIndex = index;
         loadChapterContent();
         closeAllDrawer();
     }
-    function preChapter() { if (currentChapterIndex > 0) jumpToChapter(currentChapterIndex - 1); else alert('已经是第一章了'); }
-    function nextChapter() { if (currentChapterIndex < currentChapterList.length - 1) jumpToChapter(currentChapterIndex + 1); else alert('已经是最后一章了'); }
+
+    function preChapter() {
+        if (currentChapterIndex > 0) jumpToChapter(currentChapterIndex - 1);
+        else alert('已经是第一章了');
+    }
+
+    function nextChapter() {
+        if (currentChapterIndex < currentChapterList.length - 1) jumpToChapter(currentChapterIndex + 1);
+        else alert('已经是最后一章了');
+    }
+
     function updateCatalogActive() {
         var items = document.querySelectorAll('.catalog-item');
         for (var i = 0; i < items.length; i++) items[i].classList.remove('active');
         var active = document.querySelector('.catalog-item[data-index="' + currentChapterIndex + '"]');
         if (active) active.classList.add('active');
     }
+
     function openCatalog() { catalogDrawer.classList.add('drawer-open'); drawerMask.style.display = 'block'; }
     function openSetting() { settingDrawer.classList.add('drawer-open'); drawerMask.style.display = 'block'; }
     function closeAllDrawer() { catalogDrawer.classList.remove('drawer-open'); settingDrawer.classList.remove('drawer-open'); drawerMask.style.display = 'none'; }
@@ -1024,17 +1092,21 @@
         window.open('${pageContext.request.contextPath}/chapterEdit?chapterId=' + chapterId, '_blank');
     }
 
-    // 阅读设置绑定
-    document.querySelectorAll('.theme-item').forEach(i => i.addEventListener('click', function() {
-        document.querySelectorAll('.theme-item').forEach(j => j.classList.remove('active'));
-        this.classList.add('active');
-        readPage.className = 'read-page theme-' + this.dataset.theme;
-    }));
-    document.querySelectorAll('.font-item').forEach(i => i.addEventListener('click', function() {
-        document.querySelectorAll('.font-item').forEach(j => j.classList.remove('active'));
-        this.classList.add('active');
-        readContent.style.fontFamily = this.dataset.font;
-    }));
+    // 阅读设置事件绑定
+    document.querySelectorAll('.theme-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.theme-item').forEach(function(i) { i.classList.remove('active'); });
+            this.classList.add('active');
+            readPage.className = 'read-page theme-' + this.dataset.theme;
+        });
+    });
+    document.querySelectorAll('.font-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.font-item').forEach(function(i) { i.classList.remove('active'); });
+            this.classList.add('active');
+            readContent.style.fontFamily = this.dataset.font;
+        });
+    });
     document.getElementById('fontSizeRange').addEventListener('input', function() {
         readContent.style.fontSize = this.value + 'px';
         document.getElementById('fontSizeText').innerText = this.value + 'px';
@@ -1073,7 +1145,7 @@
     document.getElementById('catalogClose').addEventListener('click', closeAllDrawer);
     document.getElementById('settingClose').addEventListener('click', closeAllDrawer);
 
-    // ================== 购物车 ==================
+    // ================== 购物车功能 ==================
     function addToCart(bookId) {
         if (!isLogin) {
             alert('道友请先登录，方可请购典籍！');
@@ -1086,7 +1158,9 @@
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4) {
                 if (xhr.status === 401) {
-                    alert('请先登录'); window.location.href = '${pageContext.request.contextPath}/login.jsp'; return;
+                    alert('请先登录');
+                    window.location.href = '${pageContext.request.contextPath}/login.jsp';
+                    return;
                 }
                 if (xhr.status === 200) {
                     try {
@@ -1099,6 +1173,7 @@
         };
         xhr.send('action=add&bookId=' + bookId + '&buyNum=1');
     }
+
     function loadCartList() {
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '${pageContext.request.contextPath}/cart', true);
@@ -1114,6 +1189,7 @@
         };
         xhr.send('action=list');
     }
+
     function renderCartList(data) {
         if (!data || data.length === 0) {
             cartEmpty.style.display = 'block';
@@ -1145,6 +1221,7 @@
         cartTotal.innerText = total.toFixed(2);
         cartBadge.innerText = totalNum;
     }
+
     function updateNum(cartId, newNum) {
         if (newNum < 1) { if (confirm("确定移出？")) deleteCartItem(cartId); return; }
         var xhr = new XMLHttpRequest();
@@ -1154,12 +1231,14 @@
             if (xhr.readyState === 4 && xhr.status === 200) {
                 try {
                     var res = JSON.parse(xhr.responseText);
-                    if (res.code === 200) loadCartList(); else alert(res.msg);
+                    if (res.code === 200) loadCartList();
+                    else alert(res.msg);
                 } catch (e) { alert('解析错误'); }
             }
         };
         xhr.send('action=update&cartId=' + cartId + '&newBuyNum=' + newNum);
     }
+
     function deleteCartItem(cartId) {
         if (!confirm("确定移出？")) return;
         var xhr = new XMLHttpRequest();
@@ -1169,12 +1248,14 @@
             if (xhr.readyState === 4 && xhr.status === 200) {
                 try {
                     var res = JSON.parse(xhr.responseText);
-                    if (res.code === 200) loadCartList(); else alert(res.msg);
+                    if (res.code === 200) loadCartList();
+                    else alert(res.msg);
                 } catch (e) { alert('解析错误'); }
             }
         };
         xhr.send('action=delete&cartId=' + cartId);
     }
+
     clearCartBtn.onclick = function() {
         if (!confirm("清空藏经袋？")) return;
         var xhr = new XMLHttpRequest();
@@ -1184,18 +1265,21 @@
             if (xhr.readyState === 4 && xhr.status === 200) {
                 try {
                     var res = JSON.parse(xhr.responseText);
-                    if (res.code === 200) loadCartList(); else alert(res.msg);
+                    if (res.code === 200) loadCartList();
+                    else alert(res.msg);
                 } catch (e) { alert('解析错误'); }
             }
         };
         xhr.send('action=clear');
     };
+
     settleBtn.onclick = function() {
         if (!isLogin) { alert('请先登录'); window.location.href = '${pageContext.request.contextPath}/login.jsp'; return; }
         var total = parseFloat(cartTotal.innerText);
         if (total <= 0) { alert('藏经袋空空'); return; }
         window.location.href = '${pageContext.request.contextPath}/orderSettle';
     };
+
     cartIcon.onclick = function() { cartModal.style.display = 'flex'; loadCartList(); };
     cartClose.onclick = function() { cartModal.style.display = 'none'; };
     function closeCartModal() { cartModal.style.display = 'none'; }

@@ -6,6 +6,9 @@ import java.util.Date;
  * 典籍实体类，完全对齐数据库表字段
  */
 public class Book {
+
+
+
     // 原有基础字段
     private Integer id;
     private String bookTitle;

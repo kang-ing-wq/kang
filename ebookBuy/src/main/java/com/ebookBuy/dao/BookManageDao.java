@@ -132,7 +132,7 @@ public class BookManageDao {
     }
 
     // ================== 原有功能方法（保留） ==================
-    // 新增典籍
+    // 新增典籍（加固版）
     public void addBook(Book book) throws SQLException, ClassNotFoundException {
         DBManager dbManager = new DBManager();
         Connection connection = dbManager.getConnection();
@@ -142,16 +142,20 @@ public class BookManageDao {
         preparedStatement.setString(1, book.getBookTitle());
         preparedStatement.setString(2, book.getBookAuthor());
         preparedStatement.setString(3, book.getBookSummary());
-        preparedStatement.setInt(4, book.getTypeId());
-        preparedStatement.setInt(5, book.getDownloadTimes());
-        preparedStatement.setString(6, book.getBookPubYear()); // 关键修正
+
+        // 使用 setObject 替代 setInt/setDouble，防止 null 拆箱报错
+        preparedStatement.setObject(4, book.getTypeId());
+        preparedStatement.setObject(5, book.getDownloadTimes());
+        preparedStatement.setString(6, book.getBookPubYear());
         preparedStatement.setString(7, book.getBookFile());
         preparedStatement.setString(8, book.getBookCover());
         preparedStatement.setString(9, book.getBookFormat());
-        preparedStatement.setDouble(10, book.getPrice());
-        preparedStatement.setInt(11, book.getStock());
-        preparedStatement.setInt(12, book.getIsSale());
-        preparedStatement.setInt(13, book.getTryReadChapter());
+
+        // 【关键加固】使用 setObject，null 会直接传给数据库
+        preparedStatement.setObject(10, book.getPrice());
+        preparedStatement.setObject(11, book.getStock());
+        preparedStatement.setObject(12, book.getIsSale());
+        preparedStatement.setObject(13, book.getTryReadChapter());
 
         preparedStatement.execute();
         preparedStatement.close();
