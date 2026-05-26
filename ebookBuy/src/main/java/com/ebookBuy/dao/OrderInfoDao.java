@@ -3,6 +3,7 @@ package com.ebookBuy.dao;
 import com.ebookBuy.db.DBManager;
 import com.ebookBuy.pojo.OrderInfo;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,7 +22,7 @@ public class OrderInfoDao {
 
         preparedStatement.setString(1, order.getId());
         preparedStatement.setString(2, order.getUserId());
-        preparedStatement.setDouble(3, order.getTotalAmount());
+        preparedStatement.setDouble(3, (Double) order.getTotalAmount());
         preparedStatement.setInt(4, order.getOrderStatus());
         preparedStatement.setTimestamp(5, new java.sql.Timestamp(order.getCreateTime().getTime()));
         preparedStatement.setString(6, order.getRemark());
@@ -46,7 +47,7 @@ public class OrderInfoDao {
             order = new OrderInfo();
             order.setId(rs.getString("id"));
             order.setUserId(rs.getString("user_id"));
-            order.setTotalAmount(rs.getDouble("total_amount"));
+            order.setTotalAmount(BigDecimal.valueOf(rs.getDouble("total_amount")));
             order.setOrderStatus(rs.getInt("order_status"));
             order.setPayTime(rs.getTimestamp("pay_time"));
             order.setCreateTime(rs.getTimestamp("create_time"));
@@ -74,7 +75,7 @@ public class OrderInfoDao {
             OrderInfo order = new OrderInfo();
             order.setId(rs.getString("id"));
             order.setUserId(rs.getString("user_id"));
-            order.setTotalAmount(rs.getDouble("total_amount"));
+            order.setTotalAmount(BigDecimal.valueOf(rs.getDouble("total_amount")));
             order.setOrderStatus(rs.getInt("order_status"));
             order.setPayTime(rs.getTimestamp("pay_time"));
             order.setCreateTime(rs.getTimestamp("create_time"));
@@ -104,7 +105,7 @@ public class OrderInfoDao {
             OrderInfo order = new OrderInfo();
             order.setId(rs.getString("id"));
             order.setUserId(rs.getString("user_id"));
-            order.setTotalAmount(rs.getDouble("total_amount"));
+            order.setTotalAmount(BigDecimal.valueOf(rs.getDouble("total_amount")));
             order.setOrderStatus(rs.getInt("order_status"));
             order.setPayTime(rs.getTimestamp("pay_time"));
             order.setCreateTime(rs.getTimestamp("create_time"));
@@ -157,7 +158,7 @@ public class OrderInfoDao {
             OrderInfo order = new OrderInfo();
             order.setId(rs.getString("id"));
             order.setUserId(rs.getString("user_id"));
-            order.setTotalAmount(rs.getDouble("total_amount"));
+            order.setTotalAmount(BigDecimal.valueOf(rs.getDouble("total_amount")));
             order.setOrderStatus(rs.getInt("order_status"));
             order.setCreateTime(rs.getTimestamp("create_time"));
             orderList.add(order);
@@ -167,5 +168,30 @@ public class OrderInfoDao {
         preparedStatement.close();
         connection.close();
         return orderList;
+    }
+
+    public OrderInfo findByIdAndUserId(String orderId, String userId) throws SQLException, ClassNotFoundException {
+        Connection connection = DBManager.getConnection();
+        String sql = "SELECT * FROM order_info WHERE id = ? AND user_id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, orderId);
+        preparedStatement.setString(2, userId);
+        ResultSet rs = preparedStatement.executeQuery();
+
+        OrderInfo order = null;
+        if (rs.next()) {
+            order = new OrderInfo();
+            order.setId(rs.getString("id"));
+            order.setUserId(rs.getString("user_id"));
+            order.setTotalAmount(rs.getBigDecimal("total_amount"));
+            order.setOrderStatus(rs.getInt("order_status"));
+            order.setCreateTime(rs.getTimestamp("create_time"));
+            order.setPayTime(rs.getTimestamp("pay_time"));
+        }
+
+        rs.close();
+        preparedStatement.close();
+        connection.close();
+        return order;
     }
 }

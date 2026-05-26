@@ -204,4 +204,65 @@ public class UsersDao {
     public String getAllUsers() {
         return "";
     }
+
+    // ================== 【模块3新增】阅读数据更新方法 ==================
+    /**
+     * 新增用户已读章节数
+     * @param userId 用户ID
+     * @param addNum 新增章节数（通常传1）
+     */
+    public void addReadChapterNum(String userId, int addNum) throws SQLException, ClassNotFoundException {
+        DBManager dbManager = new DBManager();
+        Connection connection = dbManager.getConnection();
+        String sql = "UPDATE user SET read_chapter_num = read_chapter_num + ? WHERE id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+        preparedStatement.setInt(1, addNum);
+        preparedStatement.setString(2, userId);
+
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+        connection.close();
+    }
+
+    /**
+     * 新增用户已阅典籍数（首次阅读该典籍时调用）
+     * @param userId 用户ID
+     */
+    public void addReadBookNum(String userId) throws SQLException, ClassNotFoundException {
+        DBManager dbManager = new DBManager();
+        Connection connection = dbManager.getConnection();
+        String sql = "UPDATE user SET read_book_num = read_book_num + 1 WHERE id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+        preparedStatement.setString(1, userId);
+        preparedStatement.executeUpdate();
+
+        preparedStatement.close();
+        connection.close();
+    }
+
+    /**
+     * 【事务版】更新用户阅读数据（和阅读进度在同一个事务里）
+     * @param conn 外部事务连接
+     * @param userId 用户ID
+     * @param isFirstRead 是否首次阅读该典籍
+     */
+    public void updateReadDataTx(Connection conn, String userId, boolean isFirstRead) throws SQLException {
+        // 新增章节数
+        String chapterSql = "UPDATE user SET read_chapter_num = read_chapter_num + 1 WHERE id = ?";
+        PreparedStatement chapterStmt = conn.prepareStatement(chapterSql);
+        chapterStmt.setString(1, userId);
+        chapterStmt.executeUpdate();
+        chapterStmt.close();
+
+        // 首次阅读，新增典籍数
+        if (isFirstRead) {
+            String bookSql = "UPDATE user SET read_book_num = read_book_num + 1 WHERE id = ?";
+            PreparedStatement bookStmt = conn.prepareStatement(bookSql);
+            bookStmt.setString(1, userId);
+            bookStmt.executeUpdate();
+            bookStmt.close();
+        }
+    }
 }

@@ -128,4 +128,46 @@ public class UserBookDao {
         connection.close();
         return chapterNum;
     }
+
+    // ================== 【新增】事务版新增用户已购记录（用于下单时自动解锁） ==================
+    /**
+     * 【事务专用】新增用户已购典籍记录（不关闭连接，由外部事务统一管理）
+     * @param conn 外部事务连接
+     * @param userBook 用户已购对象
+     */
+    public void addUserBookTx(Connection conn, UserBook userBook) throws SQLException {
+        String sql = "INSERT INTO user_book (id, user_id, book_id, order_id, buy_time, last_read_chapter) VALUES (UUID(),?,?,?,?,?)";
+        PreparedStatement preparedStatement = conn.prepareStatement(sql);
+
+        preparedStatement.setString(1, userBook.getUserId());
+        preparedStatement.setInt(2, userBook.getBookId());
+        preparedStatement.setString(3, userBook.getOrderId());
+        preparedStatement.setTimestamp(4, userBook.getBuyTime());
+        preparedStatement.setInt(5, userBook.getLastReadChapter());
+
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+    }
+
+    // ================== 【补充】兼容Integer userId的查询方法 ==================
+    public boolean checkUserHasBook(Integer userId, Integer bookId) throws SQLException, ClassNotFoundException {
+        return checkUserHasBook(String.valueOf(userId), bookId);
+    }
+
+    public List<Book> getUserBookList(Integer userId) throws SQLException, ClassNotFoundException {
+        return getUserBookList(String.valueOf(userId));
+    }
+
+    // ================== 【模块3新增】事务版更新阅读进度 ==================
+    public void updateReadProgressTx(Connection conn, String userId, Integer bookId, Integer chapterNum) throws SQLException {
+        String sql = "UPDATE user_book SET last_read_chapter = ?, last_read_time = NOW() WHERE user_id = ? AND book_id = ?";
+        PreparedStatement preparedStatement = conn.prepareStatement(sql);
+
+        preparedStatement.setInt(1, chapterNum);
+        preparedStatement.setString(2, userId);
+        preparedStatement.setInt(3, bookId);
+
+        preparedStatement.executeUpdate();
+        preparedStatement.close();
+    }
 }

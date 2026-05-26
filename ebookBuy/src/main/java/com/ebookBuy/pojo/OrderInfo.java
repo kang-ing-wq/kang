@@ -1,11 +1,12 @@
 package com.ebookBuy.pojo;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 public class OrderInfo {
     private String id;
     private String userId;
-    private Double totalAmount;
+    private java.math.BigDecimal totalAmount;
     private Integer orderStatus;
     private Timestamp payTime;
     private Timestamp createTime;
@@ -19,7 +20,7 @@ public class OrderInfo {
     public OrderInfo() {}
 
     // 全参构造
-    public OrderInfo(String id, String userId, Double totalAmount, Integer orderStatus, Timestamp payTime, Timestamp createTime, Timestamp cancelTime, String remark) {
+    public OrderInfo(String id, String userId, BigDecimal totalAmount, Integer orderStatus, Timestamp payTime, Timestamp createTime, Timestamp cancelTime, String remark) {
         this.id = id;
         this.userId = userId;
         this.totalAmount = totalAmount;
@@ -47,11 +48,11 @@ public class OrderInfo {
         this.userId = userId;
     }
 
-    public Double getTotalAmount() {
+    public Object getTotalAmount() {
         return totalAmount;
     }
 
-    public void setTotalAmount(Double totalAmount) {
+    public void setTotalAmount(java.math.BigDecimal totalAmount) {
         this.totalAmount = totalAmount;
     }
 

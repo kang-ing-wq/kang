@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Collections;
 public class CartDao {
 
     // ================== 对齐CartServlet的调用 ==================
@@ -54,7 +54,7 @@ public class CartDao {
             Cart cart = new Cart();
             cart.setId(rs.getString("cart_id"));       // 购物车UUID用别名
             cart.setUserId(rs.getString("user_id"));
-            cart.setBookId(rs.getInt("book_id"));     // 数据库book_id是int，对应实体类Integer
+            cart.setBookId(rs.getLong("book_id"));   // 数据库book_id是int，对应实体类Integer
             cart.setBuyNum(rs.getInt("buy_num"));
             cart.setCreateTime(rs.getTimestamp("create_time"));
             cart.setUpdateTime(rs.getTimestamp("update_time"));
@@ -132,7 +132,7 @@ public class CartDao {
             cart = new Cart();
             cart.setId(rs.getString("id"));
             cart.setUserId(rs.getString("user_id"));
-            cart.setBookId(rs.getInt("book_id"));
+            cart.setBookId(rs.getLong("book_id"));
             cart.setBuyNum(rs.getInt("buy_num"));
             cart.setCreateTime(rs.getTimestamp("create_time"));
             cart.setUpdateTime(rs.getTimestamp("update_time"));
@@ -173,5 +173,109 @@ public class CartDao {
 
     public int clearCartByUserId(String userId) throws SQLException, ClassNotFoundException {
         return clearUserCart(userId);
+    }
+
+
+    // ================== 【保留】根据cartId查询购物车记录 ==================
+    public Cart findCartById(String cartId) throws SQLException, ClassNotFoundException {
+        DBManager dbManager = new DBManager();
+        Connection connection = dbManager.getConnection();
+        String sql = "SELECT * FROM cart WHERE id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, cartId);
+        ResultSet rs = preparedStatement.executeQuery();
+
+        Cart cart = null;
+        if (rs.next()) {
+            cart = new Cart();
+            cart.setId(rs.getString("id"));
+            cart.setUserId(rs.getString("user_id"));
+            cart.setBookId(rs.getLong("book_id"));
+            cart.setBuyNum(rs.getInt("buy_num"));
+        }
+
+        rs.close();
+        preparedStatement.close();
+        connection.close();
+        return cart;
+    }
+
+    // ========== 模块2优化新增方法 ==========
+    // 更新单条商品选中状态
+    public void updateSelected(String cartId, Integer selected) throws SQLException, ClassNotFoundException {
+        DBManager dbManager = new DBManager();
+        Connection connection = dbManager.getConnection();
+        String sql = "UPDATE cart SET selected = ? WHERE id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, selected);
+        preparedStatement.setString(2, cartId);
+        preparedStatement.executeUpdate();
+
+        preparedStatement.close();
+        connection.close();
+    }
+
+    // 全选/反选用户所有购物车商品
+    public void updateAllSelected(String userId, Integer selected) throws SQLException, ClassNotFoundException {
+        DBManager dbManager = new DBManager();
+        Connection connection = dbManager.getConnection();
+        String sql = "UPDATE cart SET selected = ? WHERE user_id = ?";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setInt(1, selected);
+        preparedStatement.setString(2, userId);
+        preparedStatement.executeUpdate();
+
+        preparedStatement.close();
+        connection.close();
+    }
+
+    // 查询用户选中的购物车商品（结算专用）
+    public List<Cart> findSelectedCartListByUserId(String userId) throws SQLException, ClassNotFoundException {
+        DBManager dbManager = new DBManager();
+        Connection connection = dbManager.getConnection();
+        String sql = "SELECT * FROM cart WHERE user_id = ? AND selected = 1 ORDER BY create_time DESC";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        preparedStatement.setString(1, userId);
+        ResultSet rs = preparedStatement.executeQuery();
+
+        List<Cart> cartList = new ArrayList<>();
+        BookManageDao bookManageDao = new BookManageDao();
+        while (rs.next()) {
+            Cart cart = new Cart();
+            cart.setId(rs.getString("id"));
+            cart.setUserId(rs.getString("user_id"));
+            cart.setBookId((long) rs.getLong("book_id"));
+            cart.setBuyNum(rs.getInt("buy_num"));
+            cart.setSelected(rs.getInt("selected"));
+            cart.setCreateTime(rs.getTimestamp("create_time"));
+            // 关联典籍信息
+            cart.setBook(bookManageDao.findBookById(cart.getBookId()));
+            cartList.add(cart);
+        }
+
+        rs.close();
+        preparedStatement.close();
+        connection.close();
+        return cartList;
+    }
+
+    // 批量删除购物车商品（带用户校验，防止越权）
+    public void deleteBatchByIds(String userId, List<String> cartIds) throws SQLException, ClassNotFoundException {
+        DBManager dbManager = new DBManager();
+        Connection connection = dbManager.getConnection();
+        // 拼接占位符
+        String placeholders = String.join(",", Collections.nCopies(cartIds.size(), "?"));
+        String sql = "DELETE FROM cart WHERE user_id = ? AND id IN (" + placeholders + ")";
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+        // 设置参数
+        preparedStatement.setString(1, userId);
+        for (int i = 0; i < cartIds.size(); i++) {
+            preparedStatement.setString(i + 2, cartIds.get(i));
+        }
+        preparedStatement.executeUpdate();
+
+        preparedStatement.close();
+        connection.close();
     }
 }

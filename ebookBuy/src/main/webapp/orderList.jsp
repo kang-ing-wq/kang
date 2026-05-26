@@ -246,8 +246,13 @@
         <h1 class="page-title">仙缘订单</h1>
 
         <!-- 提示信息 -->
+        <!-- 提示信息（支持 request 和 session 双重读取，读取后立即清除 session 里的 msg，防止刷新重复提示） -->
         <c:if test="${not empty msg}">
             <div class="msg-box">${msg}</div>
+        </c:if>
+        <c:if test="${not empty sessionScope.msg}">
+            <div class="msg-box">${sessionScope.msg}</div>
+            <c:remove var="msg" scope="session"/>
         </c:if>
 
         <!-- Tab导航 -->
@@ -310,9 +315,14 @@
                                 </c:if>
 
                                 <!-- 3. 已入藏经（2）：再次阅读 -->
+                                <!-- 3. 已入藏经（2）：查看详情 + 再次阅读 -->
                                 <c:if test="${order.orderStatus == 2}">
+                                    <a href="${pageContext.request.contextPath}/orderDetail?orderId=${order.id}" class="btn">查看详情</a>
                                     <a href="${pageContext.request.contextPath}/tushuguan" class="btn">再次阅读</a>
                                 </c:if>
+
+                                <!-- 【通用】所有状态都显示「查看详情」按钮（放在按钮组最前面） -->
+                                <a href="${pageContext.request.contextPath}/orderDetail?orderId=${order.id}" class="btn" style="background-color: #1a3f45;">查看详情</a>
 
                                 <!-- 4. 已作废（3）：再次请购 -->
                                 <c:if test="${order.orderStatus == 3}">

@@ -34,7 +34,7 @@
             overflow-x: hidden;
         }
 
-        /* 左侧导航栏 */
+        /* ========== 左侧导航栏 ========== */
         .nav-sidebar {
             position: fixed;
             top: 0;
@@ -102,7 +102,7 @@
         .nav-sidebar .nav-item:nth-child(11) { color: var(--green); }
         .nav-sidebar .nav-item:nth-child(n+8):hover { text-shadow: 0 0 10px currentColor; }
 
-        /* 右侧主内容区 */
+        /* ========== 右侧主内容区 ========== */
         .content-wrap {
             margin-left: 280px;
             min-height: 100vh;
@@ -179,8 +179,17 @@
             background: linear-gradient(90deg, #c9a866, #e6c888);
             color: #0d1f24;
         }
+        /* ========== 声临其境按钮专用色调 ========== */
+        .btn-game {
+            background: linear-gradient(90deg, #2a4a1a, #3a6a2a);
+            border-color: #8ab88a;
+        }
+        .btn-game:hover {
+            background: linear-gradient(90deg, #8ab88a, #a8d8a8);
+            color: #0d1f24;
+        }
 
-        /* 典籍卡片（左图右文布局） */
+        /* ========== 典籍卡片（左图右文布局） ========== */
         .book-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -307,7 +316,7 @@
             font-size: 18px;
         }
 
-        /* 弹窗通用样式 */
+        /* ========== 弹窗通用样式 ========== */
         .form-modal {
             display: none;
             position: fixed;
@@ -371,7 +380,7 @@
         .add-card { width: 700px; }
         .detail-card { width: 1000px; max-width: 90vw; }
 
-        /* 沉浸式阅读 */
+        /* ========== 沉浸式阅读 ========== */
         .read-page {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 99999;
             transition: all 0.3s ease;
@@ -424,7 +433,7 @@
         .footer-btn { padding: 12px 60px; background: var(--read-btn-bg); border: 1px solid var(--read-border); border-radius: 5px; color: var(--read-text); font-size: 18px; cursor: pointer; transition: all 0.2s ease; letter-spacing: 2px; }
         .footer-btn:hover { background: var(--read-btn-hover); transform: translateY(-2px); }
 
-        /* 头像与用户卡片 */
+        /* ========== 头像与用户卡片 ========== */
         .avatar-wrap { display: flex; flex-direction: column; align-items: center; padding: 30px 0 20px; border-bottom: 1px solid rgba(201, 168, 102, 0.3); margin-bottom: 20px; }
         .avatar-box { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--gold-mid); overflow: hidden; box-shadow: 0 0 20px rgba(201,168,102,0.5); margin-bottom: 10px; cursor: pointer; transition: all 0.3s ease; }
         .avatar-box:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(201,168,102,0.8); }
@@ -461,7 +470,7 @@
         .logout-btn { color: var(--red); text-decoration: none; font-size: 16px; letter-spacing: 2px; transition: all 0.3s ease; }
         .logout-btn:hover { color: #ff6666; text-shadow: 0 0 10px rgba(255,102,102,0.6); }
 
-        /* 藏经袋 */
+        /* ========== 藏经袋 ========== */
         .cart-icon {
             position: fixed; top: 30px; right: 30px; width: 60px; height: 60px;
             background: linear-gradient(180deg, rgba(23,48,54,0.95) 0%, rgba(13,31,36,0.98) 100%);
@@ -520,7 +529,7 @@
         }
         .add-cart-btn:hover { background: linear-gradient(90deg, #c9a866, #e6c888); color: #0d1f24; font-weight: bold; }
 
-        /* 符文特效 */
+        /* ========== 符文特效 ========== */
         .sword-wave {
             position: fixed; width: 60px; height: 60px; border: 3px solid #c9a866; border-radius: 50%;
             pointer-events: none; z-index: 99998; box-shadow: 0 0 15px #c9a866, 0 0 30px rgba(201,168,102,0.6);
@@ -566,6 +575,8 @@
     <a href="login.jsp" class="nav-item">🔐 登录</a>
     <a href="register.jsp" class="nav-item">📝 注册成为藏书阁成员</a>
     <a href="tushuguan" class="nav-item active">📚 全本藏书</a>
+    <!-- ========== 新增"声临其境"导航项 ========== -->
+    <a href="${pageContext.request.contextPath}/gameList" class="nav-item">📖 声临其境</a>
     <a href="bookManage" class="nav-item">📋 典籍总录·管理</a>
     <a href="javascript:openAddForm()" class="nav-item">✍️ 新增典籍</a>
     <a href="${pageContext.request.contextPath}/chapterAdd" class="nav-item">📖 录入章节</a>
@@ -745,7 +756,7 @@
     </div>
 </div>
 
-<!-- 典籍详情弹窗 -->
+<!-- 典籍详情弹窗（已添加声临其境按钮） -->
 <div class="form-modal" id="detailModal">
     <div class="form-card detail-card">
         <span class="detail-close" onclick="closeDetailModal()" style="position: absolute; top: 20px; right: 30px; font-size: 40px; color: var(--gold-mid); cursor: pointer; line-height: 1; transition: all 0.3s ease;">×</span>
@@ -761,6 +772,8 @@
                 <div class="detail-btn-group" style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: auto;">
                     <button class="magic-btn" id="detail-cart-btn" data-book-id="">请购入袋</button>
                     <button class="magic-btn btn-sm" onclick="openReadModalFromDetail()">开始阅读</button>
+                    <!-- ========== 新增声临其境按钮 ========== -->
+                    <button class="magic-btn btn-sm btn-game" onclick="openGameFromDetail()">🎮 声临其境</button>
                     <a href="#" class="magic-btn btn-sm btn-danger" id="detail-del-btn" onclick="return confirm('确定要销毁这部典籍吗？此操作不可恢复！')">销毁典籍</a>
                 </div>
             </div>
@@ -774,7 +787,6 @@
 
 <!-- 沉浸式阅读界面 -->
 <div id="readPage" class="read-page">
-    <!-- 侧边栏、抽屉、正文等（原样保留） -->
     <div class="read-sidebar">
         <div class="read-sidebar-btn" id="catalogBtn" title="目录">📑</div>
         <div class="read-sidebar-btn" id="settingBtn" title="设置">⚙️</div>
@@ -877,6 +889,11 @@
     var currentChapterIndex = 0;
     var isLogin = ${not empty sessionScope.loginUser};
 
+    // ================== 工具函数 ==================
+    function getReadProgressKey() {
+        return 'read_progress_' + currentBookId;
+    }
+
     // ================== 头像与用户卡片交互 ==================
     if (loginAvatar) {
         loginAvatar.addEventListener('mouseenter', function() { userCard.classList.add('card-show'); });
@@ -915,7 +932,7 @@
         };
     }
 
-    // ================== 新增典籍 ==================
+    // ================== 新增典籍弹窗 ==================
     function openAddForm() { addFormModal.style.display = 'flex'; }
     function closeAddForm() { addFormModal.style.display = 'none'; }
     addFormModal.onclick = function(e) { if (e.target === this) closeAddForm(); };
@@ -941,7 +958,13 @@
             '<div style="display:flex;flex-direction:column;gap:5px;"><span style="font-size:14px;color:var(--text-tertiary);">传阅次数</span><span>' + ds.times + '</span></div>';
         document.getElementById('detail-summary').innerText = ds.summary || '暂无简介';
 
-        document.getElementById('detail-cart-btn').setAttribute('data-book-id', ds.bookId);
+        var detailCartBtn = document.getElementById('detail-cart-btn');
+        detailCartBtn.setAttribute('data-book-id', ds.bookId);
+        detailCartBtn.onclick = function() {
+            addToCart(this.getAttribute('data-book-id'));
+            closeDetailModal();
+        };
+
         document.getElementById('detail-del-btn').href = 'bookDelete?id=' + ds.bookId;
 
         detailModal.style.display = 'flex';
@@ -988,6 +1011,44 @@
                         currentChapterList = res.data;
                         renderChapterSelect();
                         renderCatalogList();
+
+                        if (res.lastReadChapter && res.lastReadChapter > 0) {
+                            var lastIndex = -1;
+                            for (var i = 0; i < currentChapterList.length; i++) {
+                                if (currentChapterList[i].chapterNum === res.lastReadChapter) {
+                                    lastIndex = i;
+                                    break;
+                                }
+                            }
+                            if (lastIndex >= 0) {
+                                setTimeout(function() {
+                                    jumpToChapter(lastIndex);
+                                }, 200);
+                            }
+                        }
+
+                        if (!res.hasBuy) {
+                            var tryReadChapter = res.tryReadChapter || 1;
+                            var options = chapterSelect.querySelectorAll('option');
+                            for (var i = 0; i < options.length; i++) {
+                                var chapterNum = parseInt(options[i].value);
+                                if (chapterNum > tryReadChapter) {
+                                    options[i].disabled = true;
+                                    options[i].innerText += ' 🔒 需解锁';
+                                }
+                            }
+                            var catalogItems = document.querySelectorAll('.catalog-item');
+                            for (var i = 0; i < catalogItems.length; i++) {
+                                var chapterIndex = parseInt(catalogItems[i].dataset.index);
+                                var chapterNum = currentChapterList[chapterIndex].chapterNum;
+                                if (chapterNum > tryReadChapter) {
+                                    catalogItems[i].style.pointerEvents = 'none';
+                                    catalogItems[i].style.opacity = '0.5';
+                                    catalogItems[i].style.color = 'var(--text-tertiary)';
+                                    catalogItems[i].innerHTML += ' 🔒 需解锁';
+                                }
+                            }
+                        }
                     } else {
                         alert(res.msg);
                         closeReadModal();
@@ -1032,6 +1093,10 @@
         currentChapterIndex = chapterSelect.selectedIndex;
         readContent.innerText = '正在加载章节内容...';
         updateCatalogActive();
+
+        var readMain = document.querySelector('.read-main');
+        readMain.onscroll = null;
+
         var xhr = new XMLHttpRequest();
         xhr.open('GET', '${pageContext.request.contextPath}/bookContent?action=content&bookId=' + currentBookId + '&chapterNum=' + selectedChapterNum, true);
         xhr.onreadystatechange = function() {
@@ -1042,6 +1107,33 @@
                         if (res.code === 200) {
                             document.getElementById('read-chapter-title').innerText = '第' + res.data.chapterNum + '章 ' + res.data.chapterTitle;
                             readContent.innerText = res.data.chapterContent;
+
+                            setTimeout(function() {
+                                var progressData = JSON.parse(localStorage.getItem(getReadProgressKey()) || '{}');
+                                if (progressData.chapterNum === res.data.chapterNum && progressData.scrollTop) {
+                                    readMain.scrollTop = progressData.scrollTop;
+                                } else {
+                                    readMain.scrollTop = 0;
+                                }
+
+                                readMain.onscroll = function() {
+                                    var currentProgress = {
+                                        chapterNum: res.data.chapterNum,
+                                        scrollTop: readMain.scrollTop
+                                    };
+                                    localStorage.setItem(getReadProgressKey(), JSON.stringify(currentProgress));
+                                };
+                            }, 100);
+
+                            if (res.isLastTryRead) {
+                                setTimeout(function() {
+                                    if (confirm('您已阅读完试读章节，是否前往缔结道契，解锁全本精彩内容？')) {
+                                        closeReadModal();
+                                        var bookCard = document.querySelector('.book-card[data-book-id="' + currentBookId + '"]');
+                                        if (bookCard) openDetailModal(bookCard);
+                                    }
+                                }, 500);
+                            }
                         } else {
                             alert(res.msg);
                         }
@@ -1092,24 +1184,39 @@
         window.open('${pageContext.request.contextPath}/chapterEdit?chapterId=' + chapterId, '_blank');
     }
 
-    // 阅读设置事件绑定
+    // ================== 阅读设置（本地缓存） ==================
+    function saveReadSetting() {
+        var setting = {
+            theme: document.querySelector('.theme-item.active').dataset.theme,
+            font: document.querySelector('.font-item.active').dataset.font,
+            fontSize: document.getElementById('fontSizeRange').value,
+            width: document.getElementById('widthRange').value
+        };
+        localStorage.setItem('readSetting', JSON.stringify(setting));
+    }
+
     document.querySelectorAll('.theme-item').forEach(function(item) {
         item.addEventListener('click', function() {
             document.querySelectorAll('.theme-item').forEach(function(i) { i.classList.remove('active'); });
             this.classList.add('active');
             readPage.className = 'read-page theme-' + this.dataset.theme;
+            saveReadSetting();
         });
     });
+
     document.querySelectorAll('.font-item').forEach(function(item) {
         item.addEventListener('click', function() {
             document.querySelectorAll('.font-item').forEach(function(i) { i.classList.remove('active'); });
             this.classList.add('active');
             readContent.style.fontFamily = this.dataset.font;
+            saveReadSetting();
         });
     });
+
     document.getElementById('fontSizeRange').addEventListener('input', function() {
         readContent.style.fontSize = this.value + 'px';
         document.getElementById('fontSizeText').innerText = this.value + 'px';
+        saveReadSetting();
     });
     document.getElementById('fontMinus').addEventListener('click', function() {
         var r = document.getElementById('fontSizeRange');
@@ -1121,9 +1228,11 @@
         r.value = Math.min(28, parseInt(r.value) + 1);
         r.dispatchEvent(new Event('input'));
     });
+
     document.getElementById('widthRange').addEventListener('input', function() {
         document.querySelector('.read-main').style.maxWidth = this.value + 'px';
         document.getElementById('widthText').innerText = this.value + 'px';
+        saveReadSetting();
     });
     document.getElementById('widthMinus').addEventListener('click', function() {
         var r = document.getElementById('widthRange');
@@ -1135,6 +1244,7 @@
         r.value = Math.min(1200, parseInt(r.value) + 50);
         r.dispatchEvent(new Event('input'));
     });
+
     document.getElementById('catalogBtn').addEventListener('click', openCatalog);
     document.getElementById('settingBtn').addEventListener('click', openSetting);
     document.getElementById('backTopBtn').addEventListener('click', function() {
@@ -1145,18 +1255,65 @@
     document.getElementById('catalogClose').addEventListener('click', closeAllDrawer);
     document.getElementById('settingClose').addEventListener('click', closeAllDrawer);
 
+    document.addEventListener('DOMContentLoaded', function() {
+        var readSetting = JSON.parse(localStorage.getItem('readSetting') || '{}');
+
+        if (readSetting.theme) {
+            document.querySelectorAll('.theme-item').forEach(function(item) {
+                item.classList.remove('active');
+                if (item.dataset.theme === readSetting.theme) {
+                    item.classList.add('active');
+                    readPage.className = 'read-page theme-' + readSetting.theme;
+                }
+            });
+        }
+
+        if (readSetting.font) {
+            document.querySelectorAll('.font-item').forEach(function(item) {
+                item.classList.remove('active');
+                if (item.dataset.font === readSetting.font) {
+                    item.classList.add('active');
+                    readContent.style.fontFamily = readSetting.font;
+                }
+            });
+        }
+
+        if (readSetting.fontSize) {
+            var fontSizeRange = document.getElementById('fontSizeRange');
+            fontSizeRange.value = readSetting.fontSize;
+            readContent.style.fontSize = readSetting.fontSize + 'px';
+            document.getElementById('fontSizeText').innerText = readSetting.fontSize + 'px';
+        }
+
+        if (readSetting.width) {
+            var widthRange = document.getElementById('widthRange');
+            widthRange.value = readSetting.width;
+            document.querySelector('.read-main').style.maxWidth = readSetting.width + 'px';
+            document.getElementById('widthText').innerText = readSetting.width + 'px';
+        }
+    });
+
     // ================== 购物车功能 ==================
+    var isAddingCart = false;
+
     function addToCart(bookId) {
         if (!isLogin) {
             alert('道友请先登录，方可请购典籍！');
             window.location.href = '${pageContext.request.contextPath}/login.jsp';
             return;
         }
+        if (isAddingCart) {
+            alert('正在请购中，请稍候...');
+            return;
+        }
+        isAddingCart = true;
+
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '${pageContext.request.contextPath}/cart', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4) {
+                isAddingCart = false;
                 if (xhr.status === 401) {
                     alert('请先登录');
                     window.location.href = '${pageContext.request.contextPath}/login.jsp';
@@ -1182,9 +1339,14 @@
             if (xhr.readyState === 4 && xhr.status === 200) {
                 try {
                     var res = JSON.parse(xhr.responseText);
-                    if (res.code === 200) renderCartList(res.data);
-                    else alert(res.msg);
-                } catch (e) { alert('解析错误'); }
+                    if (res.code === 200) {
+                        renderCartList(res.data);
+                    } else {
+                        alert(res.msg);
+                    }
+                } catch (e) {
+                    alert("购物车数据解析错误");
+                }
             }
         };
         xhr.send('action=list');
@@ -1202,13 +1364,19 @@
         cartList.style.display = 'flex';
         cartFooter.style.display = 'block';
         var html = '', total = 0, totalNum = 0;
+        var hasStockError = false;
+
         for (var i = 0; i < data.length; i++) {
             var item = data[i];
             var sub = item.book.price * item.buyNum;
             total += sub;
             totalNum += item.buyNum;
-            html += '<div class="cart-item">' +
-                '<div class="cart-item-info"><div class="cart-item-title">' + item.book.bookTitle + '</div>' +
+
+            var isLowStock = item.book.stock != null && item.buyNum > item.book.stock;
+            if (isLowStock) hasStockError = true;
+
+            html += '<div class="cart-item" style="' + (isLowStock ? 'border: 2px solid #a83232; background: rgba(168, 50, 50, 0.1);' : '') + '">' +
+                '<div class="cart-item-info"><div class="cart-item-title" style="' + (isLowStock ? 'color: #ff6666;' : '') + '">' + item.book.bookTitle + (isLowStock ? ' ⚠️ 库存不足' : '') + '</div>' +
                 '<div class="cart-item-author">作者：' + item.book.bookAuthor + '</div>' +
                 '<div class="cart-item-price">单本香火：' + item.book.price.toFixed(2) + ' 灵石</div></div>' +
                 '<div class="cart-item-num">' +
@@ -1220,6 +1388,18 @@
         cartList.innerHTML = html;
         cartTotal.innerText = total.toFixed(2);
         cartBadge.innerText = totalNum;
+
+        if (hasStockError) {
+            settleBtn.disabled = true;
+            settleBtn.style.opacity = '0.5';
+            settleBtn.style.pointerEvents = 'none';
+            settleBtn.innerText = '库存不足，请调整';
+        } else {
+            settleBtn.disabled = false;
+            settleBtn.style.opacity = '1';
+            settleBtn.style.pointerEvents = 'auto';
+            settleBtn.innerText = '去结算';
+        }
     }
 
     function updateNum(cartId, newNum) {
@@ -1233,7 +1413,9 @@
                     var res = JSON.parse(xhr.responseText);
                     if (res.code === 200) loadCartList();
                     else alert(res.msg);
-                } catch (e) { alert('解析错误'); }
+                } catch (e) {
+                    alert("购物车更新解析错误");
+                }
             }
         };
         xhr.send('action=update&cartId=' + cartId + '&newBuyNum=' + newNum);
@@ -1250,7 +1432,9 @@
                     var res = JSON.parse(xhr.responseText);
                     if (res.code === 200) loadCartList();
                     else alert(res.msg);
-                } catch (e) { alert('解析错误'); }
+                } catch (e) {
+                    alert("购物车删除解析错误");
+                }
             }
         };
         xhr.send('action=delete&cartId=' + cartId);
@@ -1267,17 +1451,26 @@
                     var res = JSON.parse(xhr.responseText);
                     if (res.code === 200) loadCartList();
                     else alert(res.msg);
-                } catch (e) { alert('解析错误'); }
+                } catch (e) {
+                    alert("购物车清空解析错误");
+                }
             }
         };
         xhr.send('action=clear');
     };
 
     settleBtn.onclick = function() {
-        if (!isLogin) { alert('请先登录'); window.location.href = '${pageContext.request.contextPath}/login.jsp'; return; }
+        if (!isLogin) {
+            alert('请先登录');
+            window.location.href = '${pageContext.request.contextPath}/login.jsp';
+            return;
+        }
         var total = parseFloat(cartTotal.innerText);
-        if (total <= 0) { alert('藏经袋空空'); return; }
-        window.location.href = '${pageContext.request.contextPath}/orderSettle';
+        if (total <= 0) {
+            alert('藏经袋空空，无法进行道契缔结');
+            return;
+        }
+        window.location.href = '${pageContext.request.contextPath}/orderPay';
     };
 
     cartIcon.onclick = function() { cartModal.style.display = 'flex'; loadCartList(); };
@@ -1285,7 +1478,7 @@
     function closeCartModal() { cartModal.style.display = 'none'; }
     cartModal.onclick = function(e) { if (e.target === cartModal) closeCartModal(); };
 
-    // 键盘事件
+    // ================== 全局键盘事件 ==================
     document.onkeydown = function(e) {
         e = e || window.event;
         if (e.keyCode === 27) {
@@ -1297,7 +1490,7 @@
         }
     };
 
-    // 符文特效（不拦截导航）
+    // ================== 符文特效 ==================
     var runeLibrary = ['临','兵','斗','者','皆','列','阵','在','前'];
     document.addEventListener('click', function(e) {
         if (e.target.closest('.nav-sidebar .nav-item')) return;
@@ -1314,7 +1507,7 @@
         runeEl.addEventListener('animationend', function() { this.remove(); });
     });
 
-    // 自动打开私人藏经阁跳转
+    // ================== 页面初始化 ==================
     document.addEventListener('DOMContentLoaded', function() {
         if (isLogin) loadCartList();
         var urlParams = new URLSearchParams(window.location.search);
@@ -1332,6 +1525,15 @@
             if (retry >= 30) clearInterval(interval);
         }, 100);
     });
+
+    // ================== 新增：声临其境功能 ==================
+    function openGameFromDetail() {
+        if (currentDetailCard) {
+            var bookId = currentDetailCard.dataset.bookId;
+            closeDetailModal();
+            window.location.href = '${pageContext.request.contextPath}/game?bookId=' + bookId;
+        }
+    }
 </script>
 </body>
 </html>

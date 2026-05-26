@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
-@WebServlet("/orderFinish")
-public class OrderFinishServlet extends HttpServlet {
+@WebServlet("/orderDetail")
+public class OrderDetailServlet extends HttpServlet {
     private OrderDao orderDao = new OrderDao();
 
     @Override
@@ -22,8 +22,8 @@ public class OrderFinishServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User loginUser = (User) session.getAttribute("loginUser");
         if (loginUser == null) {
-            session.setAttribute("msg", "道友请先登录");
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            request.setAttribute("msg", "道友请先登录，方可查看道契详情");
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
 
@@ -35,29 +35,25 @@ public class OrderFinishServlet extends HttpServlet {
         }
 
         try {
-            // 3. 校验订单归属
+            // 3. 查询订单详情，校验订单归属
             OrderInfo order = orderDao.getOrderById(orderId);
             if (order == null || !order.getUserId().equals(loginUser.getId())) {
-                session.setAttribute("msg", "道契不存在，或不属于您");
-                response.sendRedirect(request.getContextPath() + "/orderList");
+                request.setAttribute("msg", "道契不存在，或不属于您");
+                request.getRequestDispatcher("/orderList").forward(request, response);
                 return;
             }
 
-            // 4. 执行完成订单，更新状态为「已入藏经」（1→2）
-            int result = orderDao.finishOrder(orderId);
-            if (result > 0) {
-                session.setAttribute("msg", "典籍已成功收入私人藏经阁！");
-            } else {
-                session.setAttribute("msg", "收入藏经失败，仅待解锁的道契可执行此操作");
-            }
+            // 4. 把订单数据放到request域，传给详情页面
+            request.setAttribute("order", order);
 
-            // 5. 跳回订单列表
-            response.sendRedirect(request.getContextPath() + "/orderList");
+            // 5. 转发到详情页面（我们复用 orderPay.jsp 的风格，新建一个 orderDetail.jsp）
+            // 如果你想直接用 orderPay.jsp 改，也可以，这里我们先 forward 到一个通用的详情页
+            request.getRequestDispatcher("/orderDetail.jsp").forward(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();
-            session.setAttribute("msg", "收入藏经失败：" + e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/orderList");
+            request.setAttribute("msg", "道契详情加载失败：" + e.getMessage());
+            request.getRequestDispatcher("/orderList").forward(request, response);
         }
     }
 

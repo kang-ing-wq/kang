@@ -4,7 +4,9 @@ import com.ebookBuy.db.DBManager;
 import com.ebookBuy.pojo.Cart;
 import com.ebookBuy.pojo.OrderInfo;
 import com.ebookBuy.pojo.OrderItem;
+import com.ebookBuy.pojo.UserBook;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,10 +24,15 @@ public class OrderDao {
 
     // ================== 核心业务：从藏经袋生成道契订单 ==================
     // 事务处理：生成订单主表+订单明细+清空藏经袋+扣减典籍库存，原子性操作
+    // ================== 核心业务：从藏经袋生成道契订单（优化版：防超卖+自动解锁） ==================
+    // 事务处理：生成订单主表+订单明细+清空藏经袋+扣减典籍库存+自动解锁全本，原子性操作
     public String createOrderFromCart(String userId, String remark) throws SQLException, ClassNotFoundException {
         DBManager dbManager = new DBManager();
         Connection conn = dbManager.getConnection();
         conn.setAutoCommit(false); // 开启事务，要么全成功，要么全回滚
+
+        // 【新增】初始化UserBookDao
+        UserBookDao userBookDao = new UserBookDao();
 
         try {
             // 1. 查询用户藏经袋的所有典籍
@@ -47,13 +54,13 @@ public class OrderDao {
             orderStmt.setString(4, remark);
             orderStmt.executeUpdate();
 
-            // 4. 批量插入订单明细，同时计算总香火、扣减库存
+            // 4. 批量插入订单明细，同时计算总香火、扣减库存、【新增】自动解锁全本
             String itemSql = "INSERT INTO order_item(id, order_id, book_id, book_name, author, price, buy_num, sub_total) VALUES (?,?,?,?,?,?,?,?)";
             PreparedStatement itemStmt = conn.prepareStatement(itemSql);
 
             for (Cart cart : cartList) {
-                // 检查库存
-                int stock = bookManageDao.getBookStock(cart.getBookId());
+                // 检查库存（保留你原有的逻辑，双重保险）
+                int stock = bookManageDao.getBookStock(Math.toIntExact(cart.getBookId()));
                 if (stock < cart.getBuyNum()) {
                     throw new RuntimeException("典籍《" + cart.getBook().getBookTitle() + "》库存不足，无法生成道契");
                 }
@@ -68,7 +75,7 @@ public class OrderDao {
                 String itemId = UUID.randomUUID().toString().replace("-", "");
                 itemStmt.setString(1, itemId);
                 itemStmt.setString(2, orderId);
-                itemStmt.setInt(3, cart.getBookId());
+                itemStmt.setInt(3, Math.toIntExact(cart.getBookId()));
                 itemStmt.setString(4, cart.getBook().getBookTitle());
                 itemStmt.setString(5, cart.getBook().getBookAuthor());
                 itemStmt.setDouble(6, price);
@@ -76,8 +83,20 @@ public class OrderDao {
                 itemStmt.setDouble(8, subTotal);
                 itemStmt.addBatch();
 
-                // 扣减典籍库存
-                bookManageDao.updateBookStock(conn, cart.getBookId(), -num);
+                // 【核心优化1：防超卖】替换成 updateBookStockTx，自带 stock >= ? 校验
+                boolean stockSuccess = bookManageDao.updateBookStockTx(conn, Math.toIntExact(cart.getBookId()), num);
+                if (!stockSuccess) {
+                    throw new RuntimeException("典籍《" + cart.getBook().getBookTitle() + "》库存扣减失败，请稍后重试");
+                }
+
+                // 【核心优化2：自动解锁全本】新增 user_book 记录
+                UserBook userBook = new UserBook();
+                userBook.setUserId(userId);
+                userBook.setBookId(Math.toIntExact(cart.getBookId()));
+                userBook.setOrderId(orderId);
+                userBook.setBuyTime(new java.sql.Timestamp(System.currentTimeMillis()));
+                userBook.setLastReadChapter(1); // 默认从第1章开始读
+                userBookDao.addUserBookTx(conn, userBook);
             }
 
             // 执行批量插入明细
@@ -131,7 +150,7 @@ public class OrderDao {
             OrderInfo order = new OrderInfo();
             order.setId(rs.getString("id"));
             order.setUserId(rs.getString("user_id"));
-            order.setTotalAmount(rs.getDouble("total_amount"));
+            order.setTotalAmount(BigDecimal.valueOf(rs.getDouble("total_amount")));
             order.setOrderStatus(rs.getInt("order_status"));
             order.setPayTime(rs.getTimestamp("pay_time"));
             order.setCreateTime(rs.getTimestamp("create_time"));
@@ -162,7 +181,7 @@ public class OrderDao {
             order = new OrderInfo();
             order.setId(orderRs.getString("id"));
             order.setUserId(orderRs.getString("user_id"));
-            order.setTotalAmount(orderRs.getDouble("total_amount"));
+            order.setTotalAmount(BigDecimal.valueOf(orderRs.getDouble("total_amount")));
             order.setOrderStatus(orderRs.getInt("order_status"));
             order.setPayTime(orderRs.getTimestamp("pay_time"));
             order.setCreateTime(orderRs.getTimestamp("create_time"));

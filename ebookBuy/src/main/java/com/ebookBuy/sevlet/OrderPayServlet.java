@@ -74,12 +74,19 @@ public class OrderPayServlet extends HttpServlet {
         }
 
         try {
-            // 核心：执行支付，更新订单状态
-            int result = orderDao.payOrder(orderId);
-            if (result > 0) {
-                request.setAttribute("msg", "香火供奉成功！典籍已收入您的私人藏经阁");
+            // 1. 执行支付，更新订单状态为「待解锁」（0→1）
+            int payResult = orderDao.payOrder(orderId);
+            if (payResult > 0) {
+                // 2. 【核心优化】自动完成订单，更新为「已入藏经」（1→2）
+                // 双重保险：即使下单时已经插入过 user_book，这里也会再次确认状态
+                int finishResult = orderDao.finishOrder(orderId);
+                if (finishResult > 0) {
+                    session.setAttribute("msg", "香火供奉成功！典籍已永久收入您的私人藏经阁");
+                } else {
+                    session.setAttribute("msg", "香火供奉成功，但典籍解锁稍候生效，请稍后在私人藏经阁查看");
+                }
             } else {
-                request.setAttribute("msg", "供奉失败，道契已过期或不存在");
+                session.setAttribute("msg", "供奉失败，道契已过期或不存在");
             }
 
             // 支付完成，跳转到订单列表
@@ -87,8 +94,11 @@ public class OrderPayServlet extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("msg", "供奉失败：" + e.getMessage());
+            session.setAttribute("msg", "供奉失败：" + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/orderList");
         }
+
     }
+
+
 }
